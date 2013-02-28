@@ -1,0 +1,41 @@
+<head>
+<title>Viza656/ CSCE 647 - Image synthesis</title>
+</head>
+<body text="#000000" bgcolor="#ffffff">
+<center>
+<table border=0 cellspacing=5 cellpadding=5 width=90%>
+
+<tr>
+<td align=center>
+<b><font size=5>Project 01 <br></font>
+<b><font size=6>Your Name <br></font>
+</td>
+</tr> 
+
+<tr>
+<td align=center>
+<font size=4>
+<img src=02.bmp width=600><br>
+Reddish maroon region represents a plane in the XY axis (below the green shpere)</td>
+</tr> 
+
+<tr>
+<td align=center>
+<font size=4>
+<img src=01.bmp width=600><br>
+Gray region represents a plane in the ZX axis (behind the green shpere)
+</td>
+</tr> 
+
+<tr>
+<td align=center>
+<font size=4>
+<img src=00.bmp width=600><br>
+First image of the sphere when a ray hits the sphere.
+</td>
+</tr> 
+
+</table>
+</center>
+</body>
+</html>
