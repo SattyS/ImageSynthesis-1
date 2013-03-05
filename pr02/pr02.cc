@@ -15,10 +15,24 @@ using namespace cy;
 using namespace std;
 #define print(p) printf("(%f,%f,%f) \n",p.x,p.y,p.z);
 #define pb(a) push_back(a)
-Point3f Pe(0,0,0);      //camera or eye position
-//Point3f PL(18,15,-5);
+class SpotLight
+{
+    public:
+      Point3f source,direction;
+      double angle;
 
-Point3f PL(0,-5,0);
+      SpotLight(){  source=Point3f(0,0,0),direction=Point3f(0,0,0);angle = 30;}
+      SpotLight(Point3f src,Point3f dir,double an){  source=src,direction=dir;angle = an;}
+      SpotLight(Point3f src,Point3f dir,float an){  source=src,direction=dir;angle = an;}
+
+
+};
+
+Point3f Pe(0,0,0);      //camera or eye position
+SpotLight spotLight(Point3f(0,0,0),Point3f(0,0,1),160.0/180.0);
+
+Point3f PL = spotLight.source;
+
 /********************************************* MAIN ****************************************************************/
 int main (int argc, char const* argv[])
 {
@@ -51,8 +65,8 @@ int main (int argc, char const* argv[])
 	//vector<Sphere> allSpheres;
 	//allSpheres.pb(sphere1);
 	
-	Sphere sphere1(Point3f(0,0,20),10, Color(1,0.8,0),1);
-	Sphere sphere2(Point3f(-2,0,7),2, Color(1,0.2,0.7),2);
+	Sphere sphere1(Point3f(0,0,25),10, Color(1,0.8,0),1);
+	Sphere sphere2(Point3f(-3,-2,10),3, Color(1,0.2,0.7),2);
 	//Sphere sphere3(Point3f(-1,5,8),3, Color(0.1,0.5,1),3);
 	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
 	
@@ -87,13 +101,15 @@ int main (int argc, char const* argv[])
 	}
 	cout<<"EEye and light are outside all the object \n";
 	
-	// WRITE TO IMAGE //////////////////
-	
+        double alpha0= cos(spotLight.angle);
+
 	vector <Point3f> tmp;
 	//tmp.resize(2);
 	Color finalColor;
 	Point3f interPoint(0,0,0);
 	int spNum=0;
+        double alpha=0;
+        bool spotlightEnabled=true;
 	for (int I = 0; I < Xmax; I++)
 	{
 		for (int J = 0; J < Ymax; J++)
@@ -132,6 +148,7 @@ int main (int argc, char const* argv[])
 			Point3f shadowInter,rayStart = tmp[winIndex];
 			int flag=0;
 			Ray jujuRay(rayStart , PL-rayStart);
+
 			flag=0;
 			tmp.clear();
 			double shadowDist=0.0,distToPL=(PL-rayStart).Length(),ratio=1.0,o=1,maxDark=1;
@@ -172,14 +189,21 @@ int main (int argc, char const* argv[])
 			// FOR Soft shadows
 			Color shadowColor(ratio,ratio,ratio);
 			//shadowColor=shadowColor*ratio;
+                        
+
+                        alpha = ((rayStart - spotLight.source)%spotLight.direction)/((rayStart - spotLight.source).Length()*(spotLight.direction).Length());
+                        if(alpha >alpha0) alpha=1;
+                        else alpha = 0;
 
 			if(allObjects[winIndex]->objectName=="Sphere")	
 			{
-				//*
-				spNum = ((Sphere*)allObjects[winIndex])->id;
-				finalColor = ((Sphere*)allObjects[winIndex])->phongShader(myray);
-				// */
+                                if(spotlightEnabled)
+                                  finalColor =(((Sphere*)allObjects[winIndex])->phongShader(myray))*alpha;
+                                else
+                                  finalColor =((Sphere*)allObjects[winIndex])->phongShader(myray);
+                                
 				finalColor = finalColor*shadowColor;
+				/*
 				if(ratio !=1 && mywinIndex!=-1 )
 				{
 
@@ -194,15 +218,19 @@ int main (int argc, char const* argv[])
 
 					//finalColor = finalColor*(shadowColor*o);
 				}
-				spNum = (spNum + 1)%3;
-				//cout<<spNum<<" ";
+				*/
 			}
 			if(allObjects[winIndex]->objectName=="Plane")	
 			{
-				finalColor = ((Plane*)allObjects[winIndex])->lambertShader(myray);
+                                if(spotlightEnabled)
+                                  finalColor =(((Plane*)allObjects[winIndex])->phongShader(myray))*alpha;
+                                else
+                                  finalColor =((Plane*)allObjects[winIndex])->phongShader(myray);
+                                
+
 				//finalColor = ((Plane*)allObjects[winIndex])->getColor();
 				finalColor = finalColor*shadowColor;
-				//*
+				/*
 				if(ratio !=1 && mywinIndex!=-1 )
 				{
 
@@ -217,7 +245,7 @@ int main (int argc, char const* argv[])
 					//finalColor = finalColor*(1-o) + shadowColor*(o);
 					//finalColor = finalColor*(shadowColor*o);
 				}
-				//*/
+				// */
 
 
 				
