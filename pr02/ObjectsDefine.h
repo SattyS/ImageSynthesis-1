@@ -48,7 +48,10 @@ class Plane: public Object
 			//cout<<"assuming that eye is outside the sphere \n";
 			double t= (normalVector%(origin-ray.origin))/(normalVector%ray.direction);
 
+			//cout<<"value t: "<<t<<" ";
+			if (t<0)	return ret;
 			ret = ray.origin + t*ray.direction;
+			//print(ret);
 			return ret;
 		}	
 		virtual Color lambertShader(Ray myray)
