@@ -16,6 +16,8 @@ using namespace std;
 #define print(p) printf("(%f,%f,%f) \n",p.x,p.y,p.z);
 #define pb(a) push_back(a)
 Point3f Pe(0,0,0);      //camera or eye position
+//Point3f PL(18,15,-5);
+
 Point3f PL(0,-5,0);
 /********************************************* MAIN ****************************************************************/
 int main (int argc, char const* argv[])
@@ -49,8 +51,8 @@ int main (int argc, char const* argv[])
 	//vector<Sphere> allSpheres;
 	//allSpheres.pb(sphere1);
 	
-	Sphere sphere1(Point3f(0,-5,10),6, Color(1,0.8,0),1);
-	Sphere sphere2(Point3f(0,-3,5),2, Color(1,0.2,0.7),2);
+	Sphere sphere1(Point3f(0,0,20),10, Color(1,0.8,0),1);
+	Sphere sphere2(Point3f(-2,0,7),2, Color(1,0.2,0.7),2);
 	//Sphere sphere3(Point3f(-1,5,8),3, Color(0.1,0.5,1),3);
 	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
 	
@@ -132,10 +134,20 @@ int main (int argc, char const* argv[])
 			Ray jujuRay(rayStart , PL-rayStart);
 			flag=0;
 			tmp.clear();
-			// get all other intersection points with jujuRay except for the object itself (winIndex)
+			double shadowDist=0.0,distToPL=(PL-rayStart).Length(),ratio=1.0,o=1,maxDark=1;
+			int power=1;
+			
+			//*/ FOR SHARP SHADOWS 
+			// * get all other intersection points with jujuRay except for the object itself (winIndex)
 			for(int j=0;j<allObjects.size();j++)
 			{
 				if(j==winIndex)	continue;
+				// for soft shadows, find the distance between the intersection points also
+				if(allObjects[j]->objectName=="Sphere" )	
+				{
+					shadowDist += (((Sphere*)allObjects[j])->getTwoDelta(jujuRay))/(2*( ((Sphere*)allObjects[j])->radius)) ;
+					shadowDist = min(maxDark, shadowDist);
+				}
 				shadowInter = allObjects[j]->getIntersectionPoint(jujuRay);
 				tmp.pb(shadowInter);
 
@@ -146,22 +158,42 @@ int main (int argc, char const* argv[])
 				// if distance between startRay and the point tmp[mywinIndex] < dist b/n startRay and PL then black is the color -> continue
 				double pointToInter = (rayStart-tmp[mywinIndex]).Length(), pointToLight = ( rayStart-PL).Length();
 
-				if( pointToInter > 0.01 && pointToInter < pointToLight)
-					continue;
-			//else if((mywinIndex != -1 && (rayStart-tmp[mywinIndex]).Length() > (rayStart - PL).Length()) || (rayStart-tmp[mywinIndex])%(rayStart - PL)<0 )
-			//	continue;
+				if( pointToInter < pointToLight)
+				{
+					//ratio =  1 - (shadowDist/distToPL)  ;
+
+					ratio =  1 - pow(shadowDist,power)  ;
+					// uncomment the following line to have sharp shadows
+					//continue;
+
+
+				}
 			}
+			// FOR Soft shadows
+			Color shadowColor(ratio,ratio,ratio);
+			//shadowColor=shadowColor*ratio;
+
 			if(allObjects[winIndex]->objectName=="Sphere")	
 			{
 				//*
 				spNum = ((Sphere*)allObjects[winIndex])->id;
-				if(spNum==0)	finalColor = ((Sphere*)allObjects[winIndex])->goochShader(myray);
-				else if(spNum==1)	finalColor = ((Sphere*)allObjects[winIndex])->phongShader(myray);
-				else if(spNum==2)	finalColor = ((Sphere*)allObjects[winIndex])->lambertShader(myray);
-				else 	finalColor = ((Sphere*)allObjects[winIndex])->lambertShader(myray);
+				finalColor = ((Sphere*)allObjects[winIndex])->phongShader(myray);
 				// */
-				//finalColor = ((Sphere*)allObjects[winIndex])->phongShader(myray);
+				finalColor = finalColor*shadowColor;
+				if(ratio !=1 && mywinIndex!=-1 )
+				{
 
+					Point3f center = ((Sphere*)allObjects[mywinIndex])->center,plpt=(PL - tmp[mywinIndex]),ptnormal=((tmp[mywinIndex]-center));
+					plpt.Normalize();
+					ptnormal.Normalize();
+
+				// merging shadow with the original object's color
+					o = (plpt%ptnormal)+1;
+
+					//finalColor = finalColor*(1-o) + shadowColor*(o);
+
+					//finalColor = finalColor*(shadowColor*o);
+				}
 				spNum = (spNum + 1)%3;
 				//cout<<spNum<<" ";
 			}
@@ -169,7 +201,30 @@ int main (int argc, char const* argv[])
 			{
 				finalColor = ((Plane*)allObjects[winIndex])->lambertShader(myray);
 				//finalColor = ((Plane*)allObjects[winIndex])->getColor();
+				finalColor = finalColor*shadowColor;
+				//*
+				if(ratio !=1 && mywinIndex!=-1 )
+				{
+
+					Point3f center = ((Sphere*)allObjects[mywinIndex])->center;
+					Point3f plpt=(PL-tmp[mywinIndex]),ptnormal=((tmp[mywinIndex]-center));
+					plpt.Normalize();
+					ptnormal.Normalize();
+
+					// merging shadow with the original object's color
+					o = (plpt%ptnormal)+1;
+
+					//finalColor = finalColor*(1-o) + shadowColor*(o);
+					//finalColor = finalColor*(shadowColor*o);
+				}
+				//*/
+
+
+				
 			}
+
+
+
 			pixels[index].r=finalColor.red;
 			pixels[index].g=finalColor.green;
 			pixels[index].b=finalColor.blue;

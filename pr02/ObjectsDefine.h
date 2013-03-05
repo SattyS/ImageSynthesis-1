@@ -216,6 +216,18 @@ class Sphere : public Object
 		else 	return false;
 	}
 	virtual Color getColor(){	return color;}
+	double getTwoDelta(Ray ray)
+	{
+		//cout<<"assuming that eye is outside the sphere \n";
+		double c=(center-ray.origin)%(center-ray.origin)-(radius*radius),b=(center-ray.origin)%ray.direction;
+		double delta=b*b-c;
+		if(delta<0)	{
+			//cout<<"delta<0\n";
+			return 0.0;
+		}
+		return 2*sqrt(delta);
+	
+	}
 	virtual Point3f getIntersectionPoint(Ray ray)
 	{
 		Point3f ret;
