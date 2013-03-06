@@ -5,7 +5,7 @@ using namespace std;
 #define print(p) printf("(%f,%f,%f) \n",p.x,p.y,p.z);
 #define pb(a) push_back(a)
 extern Point3f Pe;
-extern Point3f PL;
+//extern Point3f PL;
 
 /*************************************** OBJECT CLASS **********************************************************************/
 class Object 
@@ -16,10 +16,10 @@ class Object
 		virtual Point3f getIntersectionPoint(Ray ray){return Point3f(0,0,0);}
 		virtual bool isEyeOutside(Point3f Pe){return false;}
 		virtual Color getColor(){return Color(0,0,0);}
-		virtual Color lambertShader(Ray myray){return Color(0,0,0);}
-		virtual Color goochShader(Ray ray){return Color(0,0,0);}
+		virtual Color lambertShader(Ray myray,Point3f PL){return Color(0,0,0);}
+		virtual Color goochShader(Ray ray,Point3f PL){return Color(0,0,0);}
 
-		virtual Color phongShader(Ray ray){return Color(0,0,0);}
+		virtual Color phongShader(Ray ray,Point3f PL){return Color(0,0,0);}
 
 };
 /*************************************** OBJECT CLASS **********************************************************************/
@@ -54,7 +54,7 @@ class Plane: public Object
 			//print(ret);
 			return ret;
 		}	
-		virtual Color lambertShader(Ray myray)
+		virtual Color lambertShader(Ray myray,Point3f PL)
 		{
 			Color spColor ;
 			Point3f Ph,Pc, nh,nlh;
@@ -114,7 +114,7 @@ class Plane: public Object
 			return finalColor;
 
 		}
-		virtual Color goochShader(Ray myray)
+		virtual Color goochShader(Ray myray,Point3f PL)
 		{
 			Color spColor ;
 			Point3f Ph,Pc, nh,nlh;
@@ -142,7 +142,7 @@ class Plane: public Object
 			return finalColor;
 		}
 
-		virtual Color phongShader(Ray myray)
+		virtual Color phongShader(Ray myray,Point3f PL)
 		{
 			Color spColor ;
 			Point3f Ph,Pc, nh,nlh;
@@ -154,7 +154,7 @@ class Plane: public Object
 			Ph=getIntersectionPoint(myray);
 			nh=normalVector;
 			nlh=(PL - Ph);nlh.Normalize();
-			finalColor = lambertShader(myray);
+			finalColor = lambertShader(myray,PL);
 
 			v=Pe-Ph;v.Normalize();
 			r= 2*(v%nh)*nh-v ;r.Normalize();
@@ -253,7 +253,7 @@ class Sphere : public Object
 		
 		return ret;
 	}
-	virtual Color lambertShader(Ray myray)
+	virtual Color lambertShader(Ray myray,Point3f PL)
 	{
 		Color spColor ;
 		Point3f Ph,Pc, nh,nlh;
@@ -282,7 +282,7 @@ class Sphere : public Object
 		return finalColor;
 
 	}
-	virtual Color goochShader(Ray myray)
+	virtual Color goochShader(Ray myray,Point3f PL)
 	{
 		Color spColor ;
 		Point3f Ph,Pc, nh,nlh;
@@ -311,7 +311,7 @@ class Sphere : public Object
 		return finalColor;
 	}
 
-	virtual Color phongShader(Ray myray)
+	virtual Color phongShader(Ray myray,Point3f PL)
 	{
 		//========================================== L & G =======================================
 		Color spColor ;
@@ -321,7 +321,7 @@ class Sphere : public Object
 		Point3f v,r;
 		Color ambient_color(0,0,0),diffused_color,finalColor,specular_color(1,1,1);
 
-		finalColor = lambertShader(myray);
+		finalColor = lambertShader(myray,PL );
 		spColor = color;
 		Ph=getIntersectionPoint(myray);
 
