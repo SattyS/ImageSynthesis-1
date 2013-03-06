@@ -29,15 +29,17 @@ class SpotLight
 };
 
 Point3f Pe(0,0,0);      //camera or eye position
-SpotLight spotLight(Point3f(0,0,0),Point3f(0,0,1),160.0/180.0);
+SpotLight spotLight(Point3f(0,100,65),Point3f(0,0,1),160.0/180.0);
 
 Point3f PL = spotLight.source;
+Point3f DirectionLight(0,-1,0);
 
 /********************************************* MAIN ****************************************************************/
 int main (int argc, char const* argv[])
 {
 	int antiAliasing=0;
 	
+        bool spotlightEnabled=false;
 	
 	int Xmax = 500;
 	int Ymax = 500;
@@ -65,30 +67,30 @@ int main (int argc, char const* argv[])
 	//vector<Sphere> allSpheres;
 	//allSpheres.pb(sphere1);
 	
-	Sphere sphere1(Point3f(0,0,25),10, Color(1,0.8,0),1);
-	Sphere sphere2(Point3f(-3,-2,10),3, Color(1,0.2,0.7),2);
+	Sphere sphere1(Point3f(0,0,65),10, Color(1,0.8,0),1);
+	//Sphere sphere2(Point3f(-3,-2,10),3, Color(1,0.2,0.7),2);
 	//Sphere sphere3(Point3f(-1,5,8),3, Color(0.1,0.5,1),3);
 	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
 	
-	Plane plane1(Point3f(0,-1,0), Point3f(0,30,0), Color(.3,0,.3));
-	Plane plane2(Point3f(-1,0,0), Point3f(30,0,0), Color(.3,1,.3));
-	Plane plane3(Point3f(0,0,-1), Point3f(0,0,30), Color(.3,1,1));
-	Plane plane4(Point3f(0,0,1), Point3f(0,0,-30), Color(0,1,0));
+	//Plane plane1(Point3f(0,-1,0), Point3f(0,30,0), Color(.3,0,.3));
+	//Plane plane2(Point3f(-1,0,0), Point3f(30,0,0), Color(.3,1,.3));
+	//Plane plane3(Point3f(0,0,-1), Point3f(0,0,60), Color(.3,1,1));
+	//Plane plane4(Point3f(0,0,1), Point3f(0,0,-30), Color(0,1,0));
 	Plane plane5(Point3f(0,1,0), Point3f(0,-30,0), Color(1,0,0));
-	Plane plane6(Point3f(1,0,0), Point3f(-30,0,0), Color(1,1,0));
+	//Plane plane6(Point3f(1,0,0), Point3f(-30,0,0), Color(1,1,0));
 
 	vector<Object*> allObjects;
 	allObjects.push_back(dynamic_cast<Object*>(&sphere1));
-	allObjects.push_back(dynamic_cast<Object*>(&sphere2));
+	//allObjects.push_back(dynamic_cast<Object*>(&sphere2));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere3));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere4));
 	//
-	allObjects.push_back(dynamic_cast<Object*>(&plane1));
-	allObjects.push_back(dynamic_cast<Object*>(&plane2));
-	allObjects.push_back(dynamic_cast<Object*>(&plane3));
-	allObjects.push_back(dynamic_cast<Object*>(&plane4));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane1));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane3));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
 	allObjects.push_back(dynamic_cast<Object*>(&plane5));
-	allObjects.push_back(dynamic_cast<Object*>(&plane6));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
 	Ray myray(Pe,npe);
 	int No=allObjects.size();	
 	vector<Point3f > myinter;
@@ -109,7 +111,6 @@ int main (int argc, char const* argv[])
 	Point3f interPoint(0,0,0);
 	int spNum=0;
         double alpha=0;
-        bool spotlightEnabled=true;
 	for (int I = 0; I < Xmax; I++)
 	{
 		for (int J = 0; J < Ymax; J++)
@@ -147,13 +148,14 @@ int main (int argc, char const* argv[])
 			//shader equatoins:
 			Point3f shadowInter,rayStart = tmp[winIndex];
 			int flag=0;
-			Ray jujuRay(rayStart , PL-rayStart);
+                        Point3f NH ;
+                        Ray jujuRay(rayStart , PL-rayStart);
 
 			flag=0;
 			tmp.clear();
 			double shadowDist=0.0,distToPL=(PL-rayStart).Length(),ratio=1.0,o=1,maxDark=1;
 			int power=1;
-			
+			double cDirect;
 			//*/ FOR SHARP SHADOWS 
 			// * get all other intersection points with jujuRay except for the object itself (winIndex)
 			for(int j=0;j<allObjects.size();j++)
@@ -169,8 +171,36 @@ int main (int argc, char const* argv[])
 				tmp.pb(shadowInter);
 
 			}
-			int mywinIndex= findWinningPointIndex(tmp , rayStart);
-			if(mywinIndex !=-1)// && tmp[mywinIndex]!=rayStart)
+                        int mywinIndex= findWinningPointIndex(tmp , rayStart);
+			if(mywinIndex !=-1 && allObjects[mywinIndex]->objectName=="Sphere")	
+			{
+                          NH  = (tmp[mywinIndex] - ((Sphere*)(allObjects[mywinIndex]))->center   );
+                        }
+//*
+                        else if(mywinIndex !=-1 && allObjects[mywinIndex]->objectName=="Plane")	
+			{
+                          NH = (-1)*(((Plane*)(allObjects[mywinIndex]))->normalVector);
+                        }
+
+
+                        NH.Normalize();
+                        DirectionLight.Normalize();
+                        cDirect = DirectionLight%NH;                         // for directional light control value
+                        //cout<<cDirect<<endl;
+                        if(cDirect < 0.0 )
+                        {
+                          //cout<<cDirect<<endl;
+                          cDirect = 1;
+                        }
+                        else {
+                          //cout<<cDirect<<endl;
+                          cDirect = 0;
+                        }
+
+                        // */
+                        // uncomment the following line for normal point light
+                        //cDirect = 0;
+                        if(mywinIndex !=-1)// && tmp[mywinIndex]!=rayStart)
 			{
 				// if distance between startRay and the point tmp[mywinIndex] < dist b/n startRay and PL then black is the color -> continue
 				double pointToInter = (rayStart-tmp[mywinIndex]).Length(), pointToLight = ( rayStart-PL).Length();
@@ -202,7 +232,8 @@ int main (int argc, char const* argv[])
                                 else
                                   finalColor =((Sphere*)allObjects[winIndex])->phongShader(myray);
                                 
-				finalColor = finalColor*shadowColor;
+				if(cDirect==0)
+                                  finalColor = finalColor*shadowColor;
 				/*
 				if(ratio !=1 && mywinIndex!=-1 )
 				{
@@ -225,11 +256,16 @@ int main (int argc, char const* argv[])
                                 if(spotlightEnabled)
                                   finalColor =(((Plane*)allObjects[winIndex])->phongShader(myray))*alpha;
                                 else
-                                  finalColor =((Plane*)allObjects[winIndex])->phongShader(myray);
+                                {
+                                  finalColor =((Plane*)allObjects[winIndex])->lambertShader(myray);
+
+				  //finalColor = ((Plane*)allObjects[winIndex])->getColor();
+                                }
                                 
 
 				//finalColor = ((Plane*)allObjects[winIndex])->getColor();
-				finalColor = finalColor*shadowColor;
+				if(cDirect==0)
+                                  finalColor = finalColor*shadowColor;
 				/*
 				if(ratio !=1 && mywinIndex!=-1 )
 				{
