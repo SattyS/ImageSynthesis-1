@@ -50,7 +50,7 @@ class AreaLight
 };
 
 
-Point3f Pe(0,0,-10);      //camera or eye position
+Point3f Pe(0,0,0);      //camera or eye position
 SpotLight spotLight(Point3f(0,14,25),Point3f(0,0,1),160.0/180.0);
 AreaLight myAreaLight;
 
@@ -70,7 +70,7 @@ int main (int argc, char const* argv[])
 	
 	
 	RGBType *pixels= new RGBType[n];
-	int index=0,M=8,N=8; 
+	int index=0,M=24,N=24; 
 	int Sx=10,winIndex=0;
 	int Sy=(Sx*Ymax)/Xmax;
 	double x,y;
