@@ -29,7 +29,7 @@ class SpotLight
 };
 
 Point3f Pe(0,0,0);      //camera or eye position
-SpotLight spotLight(Point3f(0,-1,0),Point3f(0,0,1),60.0/180.0);
+SpotLight spotLight(Point3f(0,-1,0),Point3f(0,0,1),110.0/180.0);
 
 //Point3f PL = spotLight.source;
 Point3f DirectionLight(0,-1,0);
@@ -99,7 +99,7 @@ int main (int argc, char const* argv[])
 {
 	int antiAliasing=0;
 	
-        bool spotlightEnabled=false;
+        bool spotlightEnabled=true;
 	
 	int Xmax = 500;
 	int Ymax = 500;
@@ -147,9 +147,9 @@ int main (int argc, char const* argv[])
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere3));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere4));
 	
-	allObjects.push_back(dynamic_cast<Object*>(&plane1));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane1));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane3));
+	allObjects.push_back(dynamic_cast<Object*>(&plane3));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane5));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
@@ -289,7 +289,7 @@ int main (int argc, char const* argv[])
 
 			// */
 			// uncomment the following line for normal point light
-			//cDirect = 0;
+			cDirect = 0;
 			if(mywinIndex !=-1)// && tmp[mywinIndex]!=rayStart)
 			{
 				// if distance between startRay and the point tmp[mywinIndex] < dist b/n startRay and PL then black is the color -> continue
@@ -313,40 +313,61 @@ int main (int argc, char const* argv[])
 
 			alpha = ((rayStart - spotLight.source)%spotLight.direction)/((rayStart - spotLight.source).Length()*(spotLight.direction).Length());
 			if(alpha >alpha0) alpha=1;
-			else alpha = 0;
+			else alpha = 0.4;
+                        /*
+                        double X,Y,S0=10,S1=10,Z;
+                        S0=500;
+                        S1=S0;
+
+                        X = (I+0.5 - P00.x)/S0;
+                        Y = (J+0.5 - P00.y)/S1;
+                        double u =X- (int)X,v = Y - (int)Y;
+                        if(u<0)	u = u+1;
+                        if(v<0)	v = v+1;
+
+
+                        u = u*projectionImageWidth,v=v*projectionImageHeight;
+                        int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
+
+                        //printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
+                        //cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
+                        //cout<< (float)pixmap[pixmapIndex]<<endl;
+                        finalColor.red = (float)(pixmap[pixmapIndex])/maxcolor;
+                        finalColor.green =(float)(pixmap[pixmapIndex + 1])/maxcolor;
+                        finalColor.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
+
+                        finalColor = finalColor*alpha;
+                        */
+
+
+
+
+                        
+
+                        //*
 
 			if(allObjects[winIndex]->objectName=="Sphere")	
 			{
 				if(spotlightEnabled)
-					finalColor = finalColor+ (((Sphere*)allObjects[winIndex])->phongShader(myray,PL))*alpha;
-				else
-					finalColor = finalColor+ ((Sphere*)allObjects[winIndex])->phongShader(myray,PL);
-
-				if(mywinIndex!=-1 && softShadowFlag==0)
-					finalColor = finalColor+  Color(0,0,0);
-
-				if(cDirect==0)
-					finalColor = finalColor*shadowColor;
-                                double X,Y,S0=10,S1=10,Z;
-                                S0=500;
+                                {
+                                  double X,Y,S0=10,S1=10,Z,radiusSphere=((Sphere*)allObjects[winIndex])->radius;
+                                  S0=500;
                                 S1=S0;
 
 
 				interSectionPoint =( interSectionPoint - ((Sphere*)allObjects[winIndex])->center);
 				interSectionPoint = interSectionPoint/((Sphere*)allObjects[winIndex])->radius;
                                 
-                                X = interSectionPoint%Point3f(1,0,0);
-                                Y = interSectionPoint%Point3f(0,1,0);
+                                //X = interSectionPoint%Point3f(1,0,0);
+                                //Y = interSectionPoint%Point3f(0,1,0);
                                 Z = interSectionPoint%Point3f(0,0,1);
+                                X = (I+0.5 - P00.x)/Xmax;
+                                Y = (J+0.5 - P00.y)/Ymax;
+
+
+
                                 
-                                /*
-                                double u =X- (int)X,v = Y - (int)Y, w= Z-(int)Z;
-                                if(u<0)	u = u+1;
-				if(v<0)	v = v+1;
-				if(w<0)	w = w+1;
-                                */
-
-
+                                
 				//print(interSectionPoint);cout<<endl;
 				double psi = acos(Z);
 				double theta = acos( Y/(sqrt((1-(Z*Z))) )  );
@@ -377,53 +398,35 @@ int main (int argc, char const* argv[])
                                 finalColor = CIJ*(1-s)*(1-t) +CI1J*(s)*(1-t) +CIJ1*(1-s)*(t) +CI1J1*(s)*(t);
                                 finalColor = finalColor/255.0;
 
-				//printf("red: %f , greeb: %f , blue: %f \n",finalColor.red, finalColor.green,finalColor.blue );
 
 
+					finalColor = ( finalColor*0.5+ (((Sphere*)allObjects[winIndex])->phongShader(myray,PL))*0.5 )*alpha;
+                                }
+				else
+					finalColor = finalColor+ ((Sphere*)allObjects[winIndex])->phongShader(myray,PL);
 
+				if(mywinIndex!=-1 && softShadowFlag==0)
+					finalColor = finalColor+  Color(0,0,0);
 
-				//double X = u*Xmax,Y=v*Ymax, u1 = X-floor(X), v1 = Y-floor(Y);
-				//double X = u*projectionImageWidth,Y=v*projectionImageHeight, u1 = X-floor(X), v1 = Y-floor(Y);
-				//int X = (int)u*projectionImageWidth,Y=(int)v*projectionImageHeight, u1 = X-floor(X), v1 = Y-floor(Y);
-
-
-
-
-
-				//printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
-				//cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
-				//cout<< (float)pixmap[(int)( (Y * projectionImageWidth + X) * 3 ) +1]<<endl;
-				//finalColor.red = (float)(pixmap[(int)( (Y * projectionImageWidth + X) * 3 ) ])/maxcolor;
-				//finalColor.green =(float)( pixmap[(int)((Y * projectionImageWidth + X) * 3 ) +1 ])/maxcolor ;
-				//finalColor.blue = (float)( pixmap[(int)((Y * projectionImageWidth + X) * 3 ) +2 ])/maxcolor ;
-
+				if(cDirect==0)
+					finalColor = finalColor*shadowColor;
+                                				//printf("red: %f , greeb: %f , blue: %f \n",finalColor.red, finalColor.green,finalColor.blue );
 
 
 			}
 			if(allObjects[winIndex]->objectName=="Plane")	
 			{
 				if(spotlightEnabled)
-					finalColor = finalColor+ (((Plane*)allObjects[winIndex])->phongShader(myray,PL))*alpha;
-				else
-				{
-					//finalColor = finalColor+ ((Plane*)allObjects[winIndex])->lambertShader(myray,PL);
+                                {
 
-					finalColor = finalColor+  ((Plane*)allObjects[winIndex])->getColor();
-				}
-
-
-				//finalColor = finalColor+  ((Plane*)allObjects[winIndex])->getColor();
-				if(mywinIndex!=-1 && softShadowFlag==0)
-					finalColor = finalColor+  Color(0,0,0);
-				if(cDirect==0)
-					finalColor =  finalColor*shadowColor;
-
-				double X,Y,S0=10,S1=10;
-                                S0=100;
+                                        double X,Y,S0=10,S1=10;
+                                        S0=100;
                                 S1=S0;
                                 Point3f planeNorm =  ((Plane*)allObjects[winIndex])->normalVector;
-                                X =( (interSectionPoint - ((Plane*)allObjects[winIndex])->origin)%Point3f(1,0,0))/S0; 
-                                Y =( (interSectionPoint - ((Plane*)allObjects[winIndex])->origin)%Point3f(0,0,1))/S1; 
+                                //X =( (interSectionPoint - ((Plane*)allObjects[winIndex])->origin)%Point3f(1,0,0))/S0; 
+                                //Y =( (interSectionPoint - ((Plane*)allObjects[winIndex])->origin)%Point3f(0,1,0))/S1; 
+                                X = (I+0.5 - P00.x)/S0;
+                                Y = (J+0.5 - P00.y)/S1;
 
                                 double u =X- (int)X,v = Y - (int)Y;
                                 if(u<0)	u = u+1;
@@ -440,15 +443,29 @@ int main (int argc, char const* argv[])
 				finalColor.green =(float)(pixmap[pixmapIndex + 1])/maxcolor;
 				finalColor.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
 
+                                finalColor =( finalColor*0.5+ (((Plane*)allObjects[winIndex])->phongShader(myray,PL))*0.5 )*alpha;
+
+                                }
+				else
+				{
+					//finalColor = finalColor+ ((Plane*)allObjects[winIndex])->lambertShader(myray,PL);
+
+					finalColor = finalColor+  ((Plane*)allObjects[winIndex])->getColor();
+				}
+
+
+				//finalColor = finalColor+  ((Plane*)allObjects[winIndex])->getColor();
+				if(mywinIndex!=-1 && softShadowFlag==0)
+					finalColor = finalColor+  Color(0,0,0);
+				if(cDirect==0)
+					finalColor =  finalColor*shadowColor;
+
                                 //}
-                                								//printf("red: %f , greeb: %f , blue: %f \n",finalColor.red, finalColor.green,finalColor.blue );
-
-
-				//printf("Final color in iteration %i : \n", lightNum);
-				//finalColor.printColor();
-
+                                //printf("red: %f , greeb: %f , blue: %f \n",finalColor.red, finalColor.green,finalColor.blue );
 
 			}
+
+                        // */
 
 			pixels[index].r=finalColor.red;
 			pixels[index].g=finalColor.green;

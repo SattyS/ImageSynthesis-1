@@ -29,7 +29,7 @@ class SpotLight
 };
 
 Point3f Pe(0,0,0);      //camera or eye position
-SpotLight spotLight(Point3f(0,-1,0),Point3f(0,0,1),60.0/180.0);
+SpotLight spotLight(Point3f(0,24,25),Point3f(0,-1,0),60.0/180.0);
 
 //Point3f PL = spotLight.source;
 Point3f DirectionLight(0,-1,0);
@@ -129,7 +129,7 @@ int main (int argc, char const* argv[])
 	//vector<Sphere> allSpheres;
 	//allSpheres.pb(sphere1);
 	
-	Sphere sphere1(Point3f(0,0,25),10, Color(1,0.8,0),1);
+	Sphere sphere1(Point3f(0,0,15),10, Color(1,0.8,0),1);
 	Sphere sphere2(Point3f(-3,-2,10),3, Color(1,0.2,0.7),2);
 	//Sphere sphere3(Point3f(-1,5,8),3, Color(0.1,0.5,1),3);
 	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
@@ -147,9 +147,9 @@ int main (int argc, char const* argv[])
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere3));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere4));
 	
-	allObjects.push_back(dynamic_cast<Object*>(&plane1));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane1));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane3));
+	allObjects.push_back(dynamic_cast<Object*>(&plane3));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane5));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
@@ -158,9 +158,6 @@ int main (int argc, char const* argv[])
 	int No=allObjects.size();	
 	vector<Point3f > myinter;
 	float rnd;
-
-
-				//printf("psi: %f 
         Point3f PL;
 	PL = spotLight.source;
 
@@ -421,17 +418,37 @@ int main (int argc, char const* argv[])
 				double X,Y,S0=10,S1=10;
                                 S0=100;
                                 S1=S0;
-                                Point3f planeNorm =  ((Plane*)allObjects[winIndex])->normalVector;
                                 X =( (interSectionPoint - ((Plane*)allObjects[winIndex])->origin)%Point3f(1,0,0))/S0; 
-                                Y =( (interSectionPoint - ((Plane*)allObjects[winIndex])->origin)%Point3f(0,0,1))/S1; 
+                                Y =( (interSectionPoint - ((Plane*)allObjects[winIndex])->origin)%Point3f(0,1,0))/S1; 
 
-                                double u =X- (int)X,v = Y - (int)Y;
-                                if(u<0)	u = u+1;
+				//interSectionPoint = interSectionPoint/500.0;
+
+				//print(interSectionPoint);cout<<endl;
+				//double psi = acos(interSectionPoint.z);
+				//double theta = acos( interSectionPoint.y/( sqrt((1-(interSectionPoint.z*interSectionPoint.z))) )  );
+				//if(abs( interSectionPoint.y/( sqrt((1-(interSectionPoint.z*interSectionPoint.z))) )) > 1 ) 
+				//	theta = asin( interSectionPoint.x/( sqrt((1-(interSectionPoint.z*interSectionPoint.z))) )  );
+				//if( abs(interSectionPoint.x/( sqrt((1-(interSectionPoint.z*interSectionPoint.z))) )) > 1 )
+				//	cout<<"we are doomed!\n";
+
+
+				//double v = psi/180.0, u = theta/(360.0);
+
+				//if(interSectionPoint.x<0)	u=1-u;
+
+				double u =X- (int)X,v = Y - (int)Y;
+				if(u<0)	u = u+1;
 				if(v<0)	v = v+1;
 
+				//Ymax, u1 = X-floor(X), v1 = Y-floor(Y);
+				//double X = u*projectionImageWidth,Y=v*projectionImageHeight, u1 = X-floor(X), v1 = Y-floor(Y);
+
                                 //if(( (X>0 && X<1) && (Y>0 && Y<1) ) )   {                                  u = X; v = Y;
-                                  u = u*projectionImageWidth,v=v*projectionImageHeight;
+                                u = u*projectionImageWidth,v=v*projectionImageHeight;
 				int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
+
+
+
 
 				//printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
 				//cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
@@ -439,6 +456,7 @@ int main (int argc, char const* argv[])
 				finalColor.red = (float)(pixmap[pixmapIndex])/maxcolor;
 				finalColor.green =(float)(pixmap[pixmapIndex + 1])/maxcolor;
 				finalColor.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
+
 
                                 //}
                                 								//printf("red: %f , greeb: %f , blue: %f \n",finalColor.red, finalColor.green,finalColor.blue );
