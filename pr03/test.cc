@@ -146,14 +146,14 @@ int main (int argc, char const* argv[])
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere2));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere3));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere4));
-	/*/
-	allObjects.push_back(dynamic_cast<Object*>(&plane1));
-	allObjects.push_back(dynamic_cast<Object*>(&plane2));
+	
+	//allObjects.push_back(dynamic_cast<Object*>(&plane1));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
 	allObjects.push_back(dynamic_cast<Object*>(&plane3));
-	allObjects.push_back(dynamic_cast<Object*>(&plane4));
-	allObjects.push_back(dynamic_cast<Object*>(&plane5));
-	allObjects.push_back(dynamic_cast<Object*>(&plane6));
-	*/
+	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane5));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
+	//*/
 	Ray myray(Pe,npe);
 	int No=allObjects.size();	
 	vector<Point3f > myinter;
@@ -282,6 +282,7 @@ int main (int argc, char const* argv[])
 				cDirect = 0;
 			}
 
+
 			// */
 			// uncomment the following line for normal point light
 			//cDirect = 0;
@@ -350,12 +351,12 @@ int main (int argc, char const* argv[])
 
 				//printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
 				//cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
-				cout<< (float)pixmap[(int)( (Y * projectionImageWidth + X) * 3 ) +1]<<endl;
+				//cout<< (float)pixmap[(int)( (Y * projectionImageWidth + X) * 3 ) +1]<<endl;
 				finalColor.red = (float)(pixmap[(int)( (Y * projectionImageWidth + X) * 3 ) ])/maxcolor;
 				finalColor.green =(float)( pixmap[(int)((Y * projectionImageWidth + X) * 3 ) +1 ])/maxcolor ;
 				finalColor.blue = (float)( pixmap[(int)((Y * projectionImageWidth + X) * 3 ) +2 ])/maxcolor ;
 
-				printf("red: %f , greeb: %f , blue: %f \n",finalColor.red, finalColor.green,finalColor.blue );
+				//printf("red: %f , greeb: %f , blue: %f \n",finalColor.red, finalColor.green,finalColor.blue );
 
 
 			}
@@ -376,6 +377,44 @@ int main (int argc, char const* argv[])
 					finalColor = finalColor+  Color(0,0,0);
 				if(cDirect==0)
 					finalColor =  finalColor*shadowColor;
+
+				//interSectionPoint = interSectionPoint - ((Plane*)allObjects[winIndex])->origin;
+				interSectionPoint = interSectionPoint/30.0;
+
+				//print(interSectionPoint);cout<<endl;
+				//double psi = acos(interSectionPoint.z);
+				//double theta = acos( interSectionPoint.y/( sqrt((1-(interSectionPoint.z*interSectionPoint.z))) )  );
+				//if(abs( interSectionPoint.y/( sqrt((1-(interSectionPoint.z*interSectionPoint.z))) )) > 1 ) 
+				//	theta = asin( interSectionPoint.x/( sqrt((1-(interSectionPoint.z*interSectionPoint.z))) )  );
+				//if( abs(interSectionPoint.x/( sqrt((1-(interSectionPoint.z*interSectionPoint.z))) )) > 1 )
+				//	cout<<"we are doomed!\n";
+
+
+				//double v = psi/180.0, u = theta/(360.0);
+
+				//if(interSectionPoint.x<0)	u=1-u;
+
+				double u =interSectionPoint.x - (int)interSectionPoint.x,v = interSectionPoint.y - (int)interSectionPoint.y;
+				if(u<0)	u = u+1;
+				if(v<0)	v = v+1;
+
+				//Ymax, u1 = X-floor(X), v1 = Y-floor(Y);
+				//double X = u*projectionImageWidth,Y=v*projectionImageHeight, u1 = X-floor(X), v1 = Y-floor(Y);
+				u = u*projectionImageWidth,v=v*projectionImageHeight;
+				int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
+
+
+
+
+				//printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
+				//cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
+				//cout<< (float)pixmap[pixmapIndex]<<endl;
+				finalColor.red = (float)(pixmap[pixmapIndex])/maxcolor;
+				finalColor.green =(float)(pixmap[pixmapIndex + 1])/maxcolor;
+				finalColor.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
+
+				//printf("red: %f , greeb: %f , blue: %f \n",finalColor.red, finalColor.green,finalColor.blue );
+
 
 				//printf("Final color in iteration %i : \n", lightNum);
 				//finalColor.printColor();
