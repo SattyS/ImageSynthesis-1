@@ -37,13 +37,15 @@ Point3f DirectionLight(0,-1,0);
 /*** READ PPM ******/
 
 int projectionImageWidth, projectionImageHeight, maxcolor;
-unsigned char *pixmap;
+int bumpImageWidth, bumpImageHeight, bumpmaxcolor;
+
+unsigned char *pixmap, *bumpMap;
 //void readPPM(char *argv[])
 void readPPM()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("symm.ppm","r");					//open PPM file for reading
+	    fp=fopen("cube.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -92,6 +94,60 @@ void readPPM()
 	    //  }  								// Close if
 
 }									// End of the function
+void readPPMBumpMap()
+{ 
+	  int ch, bit, comment;
+	    FILE *fp;
+	    fp=fopen("normal1.ppm","r");					//open PPM file for reading
+	    //fp=fopen("red.ppm","r");					//open PPM file for reading
+	    if(fp == NULL)
+	    {
+		    printf("\n File Error!\n");
+		    exit(0);
+	    }
+	    char magic[10];	
+	    fscanf(fp, "%s", magic);
+	    if(magic[0]!='P'||magic[1]!='6')			//check the image format
+	    {
+		    printf("\n Magic file for the input file is not P6\n");
+		    exit(0);
+	    }
+	    ch=fgetc(fp);						//check for comment
+	    do {
+		    if (ch == '#');
+		    ch = fgetc(fp);
+	    } while (ch == '\n');
+	    ungetc(ch, fp);
+	    ch= fgetc(fp);
+	    while (ch == '#') 
+	    {
+		    while (fgetc(fp) != '\n') ;
+		    ch = fgetc(fp);
+	    }
+	    ungetc(ch, fp);
+	    fscanf (fp, "%d %d %d", &bumpImageWidth, &bumpImageHeight, &bumpmaxcolor);	//read image size information and maxcolor
+	    fgetc(fp);
+	    bumpMap= new unsigned char[bumpImageWidth * bumpImageHeight * 3];         // Dynamic memory allocation
+	    int y, x, pixel;
+	    unsigned char red, green, blue;
+	    for(y = bumpImageHeight-1; y >= 0; y--) 
+	    {
+		    for(x = 0; x < bumpImageWidth; x++) 
+		    {
+			    fscanf(fp, "%c%c%c", &red, &green, &blue);
+			    pixel = (y * bumpImageWidth + x) * 3; 
+			    bumpMap[pixel] = red;
+			    pixel++;
+			    bumpMap[pixel] = green;
+			    pixel++;
+			    bumpMap[pixel] = blue;
+		    }
+	    }
+	    fclose(fp);
+	    //  }  								// Close if
+
+}									// End of the function
+
 
 
 /********************************************* MAIN ****************************************************************/
@@ -106,6 +162,7 @@ int main (int argc, char const* argv[])
 	int n=Ymax*Xmax,dpi=72;
 
 	readPPM();
+        readPPMBumpMap();
 	
 	
 	RGBType *pixels= new RGBType[n];
@@ -149,7 +206,7 @@ int main (int argc, char const* argv[])
 	
 	//allObjects.push_back(dynamic_cast<Object*>(&plane1));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
-	allObjects.push_back(dynamic_cast<Object*>(&plane3));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane3));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane5));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
@@ -314,6 +371,8 @@ int main (int argc, char const* argv[])
 			alpha = ((rayStart - spotLight.source)%spotLight.direction)/((rayStart - spotLight.source).Length()*(spotLight.direction).Length());
 			if(alpha >alpha0) alpha=1;
 			else alpha = 0;
+                        double PI = 3.14;
+
 
 			if(allObjects[winIndex]->objectName=="Sphere")	
 			{
@@ -321,32 +380,108 @@ int main (int argc, char const* argv[])
 					finalColor = finalColor+ (((Sphere*)allObjects[winIndex])->phongShader(myray,PL))*alpha;
 				else
                                 {
-                                  double X,Y,S0=10,S1=10,Z;
+                                  double X,Y,S0=10,S1=10,Z,S2;
                                   S0=500;
-                                  S1=S0;
+                                  S1=S0;S2=S1;
+
+                                  Point3f Nh;
 
 
                                   interSectionPoint =( interSectionPoint - ((Sphere*)allObjects[winIndex])->center);
+                                  Nh = interSectionPoint;
+                                  Nh.Normalize();
                                   interSectionPoint = interSectionPoint/((Sphere*)allObjects[winIndex])->radius;
 
                                   X = interSectionPoint%Point3f(1,0,0);
                                   Y = interSectionPoint%Point3f(0,1,0);
                                   Z = interSectionPoint%Point3f(0,0,1);
-
-                                  /*
-                                     double u =X- (int)X,v = Y - (int)Y, w= Z-(int)Z;
-                                     if(u<0)	u = u+1;
-                                     if(v<0)	v = v+1;
-                                     if(w<0)	w = w+1;
-                                     */
                                   double u =X- (int)X,v = Y - (int)Y;
                                   if(u<0)	u = u+1;
                                   if(v<0)	v = v+1;
 
                                   //if(( (X>0 && X<1) && (Y>0 && Y<1) ) )   {                                  u = X; v = Y;
+                                 //////////////////////////////////// END Texture /////////////////////////////////////// 
+
+                                  // Bumbp map NH calculation 
+                                  u = u*projectionImageWidth,v=v*projectionImageHeight;
+                                  int bumpIndex = abs((int)v * bumpImageWidth + (int)u) * 3;
+
+                                  Point3f Puv = P00 + S0*X*Point3f(1,0,0) + S1*Y*Point3f(0,1,0) + S2*Z*Point3f(0,0,1);
+                                  Point3f Pu1v = Point3f(Puv.x+1, Puv.y , Puv.z);
+                                  Point3f Puv1 = Point3f(Puv.x, Puv.y+1 , Puv.z);
+
+                                  
+                                  Point3f Phu1v,Phuv1 ;
+
+                                  //print(Pu1v);
+                                  Phu1v.x = sin(2*PI*Pu1v.x )*sin( Pu1v.y );
+                                  Phu1v.y = cos(2*PI*Pu1v.x )*sin( Pu1v.y );
+                                  Phu1v.z = cos(Pu1v.y );
+
+
+                                  Phuv1.x = sin(2*PI*Puv1.x )*sin( Puv1.y );
+                                  Phuv1.y = cos(2*PI*Puv1.x )*sin( Puv1.y );
+                                  Phuv1.z = cos(Puv1.y );
+
+
+                                  Point3f V0 = Phu1v - interSectionPoint, V1 = Phuv1 - interSectionPoint;
+
+                                  double redCol = (float)(bumpMap[bumpIndex])/maxcolor, greenCol =(float)(bumpMap[bumpIndex+1])/maxcolor,blueCol=(float)(bumpMap[bumpIndex+2])/maxcolor;
+                                  double d0 = 2*redCol -1 , d1 = 2*greenCol - 1 , d2 = 2*blueCol -1 ;
+
+                                  
+                                  // multiply NH by d2 if needed 
+                                  Point3f Nhbump = Nh + d0*V0 + d1*V1;
+
+                                  Nh = Nhbump;
+/////////////////////////////////////////// END Nh calculation /////////////////////////////////////////
+
+
+//========================================== Shader equations L & G =======================================
+                                  Color spColor ;
+                                  Point3f Ph,Pc, nh,nlh;
+                                  double cosTheta=0,c;
+                                  double alphaBumpShader,s,s0,delta;
+                                  Point3f vB,r;
+                                  Color ambient_color(0,0,0),diffused_color,finalColorShade,specular_color(1,1,1);
+
+                                  finalColorShade = ((Sphere*)allObjects[winIndex])->lambertShader(myray,PL );
+                                  spColor = ((Sphere*)allObjects[winIndex])->color;
+                                  Ph= ((Sphere*)allObjects[winIndex])->getIntersectionPoint(myray);
+
+                                  // ========================== Lambert and Gooch =========================================	
+                                  diffused_color = ((Sphere*)allObjects[winIndex])->color;
+                                  Pc= ((Sphere*)allObjects[winIndex])->center;
+                                  nh=(Ph - Pc);nh.Normalize();
+
+                                  nh = Nh;
+                                  nh.Normalize();
+
+                                  nlh=(PL - Ph);nlh.Normalize();
+
+                                  vB=Pe-Ph;vB.Normalize();
+                                  r= 2*(vB%nh)*nh-vB ;r.Normalize();
+                                  s = nlh%r,s0=s,delta=1;
+                                  alphaBumpShader=4;
+                                  if (s<0.0)	s=0;
+                                  else if(s>1.0)	s=1;
+                                  s=pow(s,alphaBumpShader);
+                                  finalColorShade = finalColorShade*(1-s) + specular_color*(s);
+
+//////////////////////////////////////////////////// END SHader 
+
+
+  
+                                  // texture calculation    continued 
+                                  u =X- (int)X,v = Y - (int)Y;
+                                  if(u<0)	u = u+1;
+                                  if(v<0)	v = v+1;
+
                                   u = u*projectionImageWidth,v=v*projectionImageHeight;
                                   int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
 
+
+                                  //if(( (X>0 && X<1) && (Y>0 && Y<1) ) )   {                                  u = X; v = Y;
                                   //printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
                                   //cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
                                   //cout<< (float)pixmap[pixmapIndex]<<endl;
@@ -355,7 +490,7 @@ int main (int argc, char const* argv[])
                                   finalColor.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
 
 
-                                  finalColor = finalColor*0.7+ (((Sphere*)allObjects[winIndex])->phongShader(myray,PL))*0.3;
+                                  finalColor = finalColor*(finalColorShade);
                                 }
 
 				if(mywinIndex!=-1 && softShadowFlag==0)

@@ -35,15 +35,16 @@ SpotLight spotLight(Point3f(0,-2,0),Point3f(0,0,1),60.0/180.0);
 Point3f DirectionLight(0,-1,0);
 
 /*** READ PPM ******/
-
 int projectionImageWidth, projectionImageHeight, maxcolor;
-unsigned char *pixmap;
+int bumpImageWidth, bumpImageHeight, bumpmaxcolor;
+
+unsigned char *pixmap, *bumpMap;
 //void readPPM(char *argv[])
 void readPPM()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("symm.ppm","r");					//open PPM file for reading
+	    fp=fopen("texture1.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -92,7 +93,59 @@ void readPPM()
 	    //  }  								// Close if
 
 }									// End of the function
+void readPPMBumpMap()
+{ 
+	  int ch, bit, comment;
+	    FILE *fp;
+	    fp=fopen("texture2.ppm","r");					//open PPM file for reading
+	    //fp=fopen("red.ppm","r");					//open PPM file for reading
+	    if(fp == NULL)
+	    {
+		    printf("\n File Error!\n");
+		    exit(0);
+	    }
+	    char magic[10];	
+	    fscanf(fp, "%s", magic);
+	    if(magic[0]!='P'||magic[1]!='6')			//check the image format
+	    {
+		    printf("\n Magic file for the input file is not P6\n");
+		    exit(0);
+	    }
+	    ch=fgetc(fp);						//check for comment
+	    do {
+		    if (ch == '#');
+		    ch = fgetc(fp);
+	    } while (ch == '\n');
+	    ungetc(ch, fp);
+	    ch= fgetc(fp);
+	    while (ch == '#') 
+	    {
+		    while (fgetc(fp) != '\n') ;
+		    ch = fgetc(fp);
+	    }
+	    ungetc(ch, fp);
+	    fscanf (fp, "%d %d %d", &bumpImageWidth, &bumpImageHeight, &bumpmaxcolor);	//read image size information and maxcolor
+	    fgetc(fp);
+	    bumpMap= new unsigned char[bumpImageWidth * bumpImageHeight * 3];         // Dynamic memory allocation
+	    int y, x, pixel;
+	    unsigned char red, green, blue;
+	    for(y = bumpImageHeight-1; y >= 0; y--) 
+	    {
+		    for(x = 0; x < bumpImageWidth; x++) 
+		    {
+			    fscanf(fp, "%c%c%c", &red, &green, &blue);
+			    pixel = (y * bumpImageWidth + x) * 3; 
+			    bumpMap[pixel] = red;
+			    pixel++;
+			    bumpMap[pixel] = green;
+			    pixel++;
+			    bumpMap[pixel] = blue;
+		    }
+	    }
+	    fclose(fp);
+	    //  }  								// Close if
 
+}									// End of the function
 
 /********************************************* MAIN ****************************************************************/
 int main (int argc, char const* argv[])
@@ -106,7 +159,7 @@ int main (int argc, char const* argv[])
 	int n=Ymax*Xmax,dpi=72;
 
 	readPPM();
-	
+	readPPMBumpMap();
 	
 	RGBType *pixels= new RGBType[n];
 	int index=0,M=2,N=2; 
@@ -355,7 +408,7 @@ int main (int argc, char const* argv[])
                                   finalColor.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
 
 
-                                  finalColor = finalColor*0.7+ (((Sphere*)allObjects[winIndex])->phongShader(myray,PL))*0.3;
+                                  finalColor = finalColor*(((Sphere*)allObjects[winIndex])->phongShader(myray,PL));
                                 }
 
 				if(mywinIndex!=-1 && softShadowFlag==0)
@@ -452,16 +505,17 @@ int main (int argc, char const* argv[])
 				if(v<0)	v = v+1;
 
                                 //if(( (X>0 && X<1) && (Y>0 && Y<1) ) )   {                                  u = X; v = Y;
-                                  u = u*projectionImageWidth,v=v*projectionImageHeight;
-				int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
+                               u = u*bumpImageWidth,v=v*bumpImageHeight;
+				int pixmapIndex = abs((int)v * bumpImageWidth + (int)u) * 3;
 
+
+                                finalColor.red = (float)(bumpMap[pixmapIndex])/bumpmaxcolor;
+                                finalColor.green =(float)(bumpMap[pixmapIndex + 1])/bumpmaxcolor;
+				finalColor.blue = (float)(bumpMap[pixmapIndex + 2])/bumpmaxcolor;
 				//printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
 				//cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
 				//cout<< (float)pixmap[pixmapIndex]<<endl;
-				finalColor.red = (float)(pixmap[pixmapIndex])/maxcolor;
-				finalColor.green =(float)(pixmap[pixmapIndex + 1])/maxcolor;
-				finalColor.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
-
+			
                                 //}
                                 								//printf("red: %f , greeb: %f , blue: %f \n",finalColor.red, finalColor.green,finalColor.blue );
 

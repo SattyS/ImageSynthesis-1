@@ -342,7 +342,7 @@ class Sphere : public Object
 		finalColor = finalColor*(1-s) + specular_color*(s);
 		return finalColor;
 	}
-
+       
 };
 int findWinningPointIndex(vector<Point3f > myinter ,Point3f Pe)
 {

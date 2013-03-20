@@ -355,7 +355,18 @@ int main (int argc, char const* argv[])
                                   finalColor.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
 
 
-                                  finalColor = finalColor*0.7+ (((Sphere*)allObjects[winIndex])->phongShader(myray,PL))*0.3;
+                                                                    double col= cos(v);
+
+
+				//printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
+				//cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
+				//cout<< (float)pixmap[pixmapIndex]<<endl;
+				finalColor.red = col;
+				finalColor.green = 0;
+                                finalColor.blue = col;
+                                //finalColor = finalColor*(((Sphere*)allObjects[winIndex])->phongShader(myray,PL));
+
+
                                 }
 
 				if(mywinIndex!=-1 && softShadowFlag==0)
@@ -363,6 +374,7 @@ int main (int argc, char const* argv[])
 
 				if(cDirect==0)
 					finalColor = finalColor*shadowColor;
+                                
                                 				
 				/*
 
@@ -429,19 +441,8 @@ int main (int argc, char const* argv[])
 				else
 				{
 					//finalColor = finalColor+ ((Plane*)allObjects[winIndex])->lambertShader(myray,PL);
-
-					finalColor = finalColor+  ((Plane*)allObjects[winIndex])->getColor();
-				}
-
-
-				//finalColor = finalColor+  ((Plane*)allObjects[winIndex])->getColor();
-				if(mywinIndex!=-1 && softShadowFlag==0)
-					finalColor = finalColor+  Color(0,0,0);
-				if(cDirect==0)
-					finalColor =  finalColor*shadowColor;
-
-				double X,Y,S0=10,S1=10;
-                                S0=100;
+                                  double X,Y,S0=10,S1=10;
+                                  S0=100;
                                 S1=S0;
                                 Point3f planeNorm =  ((Plane*)allObjects[winIndex])->normalVector;
                                 X =( (interSectionPoint - ((Plane*)allObjects[winIndex])->origin)%Point3f(1,0,0))/S0; 
@@ -455,14 +456,28 @@ int main (int argc, char const* argv[])
                                   u = u*projectionImageWidth,v=v*projectionImageHeight;
 				int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
 
+                                double col= sin(10*u);
+
+
 				//printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
 				//cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
 				//cout<< (float)pixmap[pixmapIndex]<<endl;
-				finalColor.red = (float)(pixmap[pixmapIndex])/maxcolor;
-				finalColor.green =(float)(pixmap[pixmapIndex + 1])/maxcolor;
-				finalColor.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
+				finalColor.red = col;
+				finalColor.green = col;
+                                finalColor.blue = col;
 
-                                //}
+
+					//finalColor = finalColor*((Plane*)allObjects[winIndex])->getColor();
+				}
+
+
+				//finalColor = finalColor+  ((Plane*)allObjects[winIndex])->getColor();
+				if(mywinIndex!=-1 && softShadowFlag==0)
+					finalColor = finalColor+  Color(0,0,0);
+				if(cDirect==0)
+					finalColor =  finalColor*shadowColor;
+
+				                                //}
                                 								//printf("red: %f , greeb: %f , blue: %f \n",finalColor.red, finalColor.green,finalColor.blue );
 
 
