@@ -329,7 +329,7 @@ class GenericObject:public Object
 			//objData->load("tetrahedron.obj");
 			objectName = "genericObject";
 			triangles = LoadObjMesh("tetrahedron.obj");
-			color = Color(1,0,0);
+			color = Color(1,1,1);
 		}
 		GenericObject(ObjMesh tri)
 		{
@@ -346,7 +346,7 @@ class GenericObject:public Object
 			triangles = LoadObjMesh(fn);
 			cout<<"constructor str filename\n";
 			objectName = "genericObject";
-			color = Color(1,0,0);
+			color = Color(1,1,1);
 		}
 		virtual bool isEyeOutside(Point3f Pe)
 		{
@@ -452,6 +452,64 @@ class GenericObject:public Object
 			return tmpVector[index];
 
 		}
+
+                double twoDist(Ray ray)
+                {
+                  int numPlanes = triangles.faces.size(), index =-1;
+                  vector<Point3f> tmpVector;
+            //cout<<"numplanes: "<<numPlanes<<endl;
+
+			for(int i = 0; i < numPlanes; i++ )
+			{
+				ObjMeshFace triangleFace = triangles.faces[i];
+				Point3f triNorm(triangleFace.vertices[0].normal); 
+				triNorm.Normalize();
+				Plane triPlane( triNorm,triangleFace.vertices[0].pos );
+				//print(triPlane.origin);
+				Point3f P0 = triangleFace.vertices[0].pos;
+				Point3f P1 = triangleFace.vertices[1].pos;
+				Point3f P2 = triangleFace.vertices[2].pos;
+
+				Point3f interPoint = triPlane.getIntersectionPoint(ray) , Ph = interPoint;
+
+				Point3f A0 = areaOfTriangle(P1, P2 , Ph);
+				Point3f A1 = areaOfTriangle(P2, P0 , Ph);
+				Point3f A2 = areaOfTriangle(P0, P1 , Ph);
+				Point3f A  = areaOfTriangle(P0, P1 , P2);
+
+				double w0 = ( A0.x + A0.y + A0.z )/(A.x + A.y + A.z);
+				double w1 = ( A1.x + A1.y + A1.z )/(A.x + A.y + A.z);
+				double w2 = ( A2.x + A2.y + A2.z )/(A.x + A.y + A.z);
+
+				//printf("three ws: %f, %f, %f \n",w0,w1,w2);
+
+				// if in same plane
+				if( w0 + w1 + w2 >= 0.95 && w0 + w1 + w2 <=1.05 )
+				{
+					// if inside the triangle
+					//cout<<"in the same plane!!\n";
+					if( (w0 >=0 && w0 <=1) && (w1 >=0 && w1 <=1) &&  (w2 >=0 && w2 <=1) )
+					{
+					    //cout<<"inside the triangle!!\n";
+						tmpVector.push_back(interPoint);
+					}
+				 }
+			}
+			double minDist = INT_MAX, len=0.0;
+			//cout<<tmpVector.size()<<endl;
+
+                        if(tmpVector.size() ==2 )
+                        {
+                          return (tmpVector[0] - tmpVector[1]).Length();  
+                        
+                        }
+                        //else
+                        //  cout<<"something is wrong ... check!\n";
+			return 0.0;
+
+
+
+                }
 		virtual Color lambertShader(Ray myray,Point3f PL){
 			
 			
@@ -516,15 +574,6 @@ class GenericObject:public Object
 					    //cout<<"inside the triangle!!\n";
 
 						faceindex = i;
-						//cout<<"face index of this point: ";print(interSectionPoint);cout<<endl;
-						//Point3f centroid((triangleFace.vertices[0].pos + triangleFace.vertices[1].pos + triangleFace.vertices[2].pos)/3.0);
-
-						/*
-						FacePoint myPoint;
-						myPoint.point = centroid;
-						myPoint.faceindex= faceindex;
-						vectPoints.pb(myPoint);
-						*/
 						break;
 					}
 					

@@ -59,7 +59,7 @@ void readPPM()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("tex2.ppm","r");					//open PPM file for reading
+	    fp=fopen("texture1.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -112,7 +112,7 @@ void readPPMBumpMap()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("normal3.ppm","r");					//open PPM file for reading
+	    fp=fopen("tex1.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -218,7 +218,7 @@ int main (int argc, char const* argv[])
 
 
 	string genericObjFileName="cube_00.obj";
-	genericObjFileName = "cube_oriented.obj";
+	genericObjFileName = "ico.obj";
 	 //char *objfilename = "tetrahedron.obj";
 
 /*
@@ -265,12 +265,12 @@ int main (int argc, char const* argv[])
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere3));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere4));
 	
-	//allObjects.push_back(dynamic_cast<Object*>(&plane1));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane3));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane5));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
+	allObjects.push_back(dynamic_cast<Object*>(&plane1));
+	allObjects.push_back(dynamic_cast<Object*>(&plane2));
+	allObjects.push_back(dynamic_cast<Object*>(&plane3));
+	allObjects.push_back(dynamic_cast<Object*>(&plane4));
+	allObjects.push_back(dynamic_cast<Object*>(&plane5));
+	allObjects.push_back(dynamic_cast<Object*>(&plane6));
 
 	allObjects.push_back(dynamic_cast<Object*>(&cube));
 	//*/
@@ -382,6 +382,12 @@ int main (int argc, char const* argv[])
 					shadowDist += (((Sphere*)allObjects[j])->getTwoDelta(jujuRay))/(2*( ((Sphere*)allObjects[j])->radius)) ;
 					shadowDist = min(maxDark, shadowDist);
 				}
+                                else if(allObjects[j]->objectName=="genericObject" )	
+				{
+					shadowDist += (((GenericObject*)allObjects[j])->twoDist(jujuRay))/5.0;
+                                        shadowDist = min(maxDark, shadowDist);
+                                }
+
 				shadowInter = allObjects[j]->getIntersectionPoint(jujuRay);
 				tmp.pb(shadowInter);
 
@@ -651,6 +657,9 @@ int main (int argc, char const* argv[])
 				Point3f triNorm(triangleFace.vertices[0].normal); 
 				triNorm.Normalize();
 				Plane triPlane( triNorm,triangleFace.vertices[0].pos );
+
+
+
 				//print(triPlane.origin);
 				Point3f P0 = triangleFace.vertices[0].pos;
 				Point3f P1 = triangleFace.vertices[1].pos;
@@ -707,7 +716,10 @@ int main (int argc, char const* argv[])
 
 			    finalColor = ((GenericObject*)allObjects[winIndex])->getColor();
                                 //if(( (X>0 && X<1) && (Y>0 && Y<1) ) )   {                                  u = X; v = Y;
-				
+			
+
+
+                            /*
 				double u = ((GenericObject*)allObjects[winIndex])->triangles.faces[faceindex].vertices[0].texcoord.x;
 				double v = ((GenericObject*)allObjects[winIndex])->triangles.faces[faceindex].vertices[0].texcoord.y;
 
@@ -720,16 +732,121 @@ int main (int argc, char const* argv[])
                                 tmpColor.green =(float)(bumpMap[pixmapIndex + 1])/bumpmaxcolor;
 				tmpColor.blue = (float)(bumpMap[pixmapIndex + 2])/bumpmaxcolor;
 
-				finalColor = finalColor*tmpColor;
+				finalColor = tmpColor;
 
-				/*
-				if(faceindex ==0 )	finalColor = Color(1,1,1);
-				if(faceindex ==1 )	finalColor = Color(1,0,1);
-				if(faceindex ==2 )	finalColor = Color(1,1,0);
-				if(faceindex ==3 )	finalColor = Color(0,1,1);
-				*/
+                            // *
+                            if(faceindex ==0 )	finalColor = Color(1,1,1);
+                            if(faceindex ==1 )	finalColor = Color(1,0,1);
+                            if(faceindex ==2 )	finalColor = Color(1,1,0);
+                            if(faceindex ==3 )	finalColor = Color(0,1,1);
+                            */
+
+
+
+                            for(int i = 0; i < numPlanes; i++ )
+                            {
+                              ObjMeshFace triangleFace = ((GenericObject*)allObjects[winIndex])->triangles.faces[i];
+                              Point3f triNorm(triangleFace.vertices[0].normal); 
+                              triNorm.Normalize();
+                              Plane triPlane( triNorm,triangleFace.vertices[0].pos );
+                              //print(triPlane.origin);
+                              Point3f P0 = triangleFace.vertices[0].pos;
+                              Point3f P1 = triangleFace.vertices[1].pos;
+                              Point3f P2 = triangleFace.vertices[2].pos;
+
+                              //Point3f interPoint = triPlane.getIntersectionPoint(ray) , Ph = interPoint;
+
+                              Point3f A0 = areaOfTriangle(P1, P2 , Ph);
+                              Point3f A1 = areaOfTriangle(P2, P0 , Ph);
+                              Point3f A2 = areaOfTriangle(P0, P1 , Ph);
+                              Point3f A  = areaOfTriangle(P0, P1 , P2);
+
+                              //cout<<"wx "<<A0.x/A.x<<endl;
+                              //cout<<"wy "<<A0.y/A.y<<endl;
+                              //cout<<"wz "<<A0.z/A.z<<endl;
+                              double w0 = ( A0.x + A0.y + A0.z )/(A.x + A.y + A.z);
+                              double w1 = ( A1.x + A1.y + A1.z )/(A.x + A.y + A.z);
+                              double w2 = ( A2.x + A2.y + A2.z )/(A.x + A.y + A.z);
+
+                              //printf("three ws: %f, %f, %f \n",w0,w1,w2);
+
+                              // if in same plane
+                              //if( w0 + w1 + w2 >= 0.99  && w0+w1+w2<=1.01 )
+                              //{
+                              // if inside the triangle
+                              //cout<<"in the same plane!!\n";
+                              double sumArea = A1.Length() + A2.Length() + A0.Length();
+
+                              //if( (w0 >=0 && w0 <=1) && (w1 >=0 && w1 <=1) &&  (w2 >=0 && w2 <=1) )
+                              if(sumArea >= 0.97*A.Length() && sumArea <= 1.03*A.Length())
+                              {
+                                //cout<<"inside the triangle!!\n";
+
+                                faceindex = i; 
+                                double X,Y,S0=10,S1=10,Z;
+                                  S0=500;
+                                  S1=S0;
+
+
+                                  interSectionPoint =triNorm;
+                                  //interSectionPoint = interSectionPoint/((Sphere*)allObjects[winIndex])->radius;
+
+                                  X = interSectionPoint%Point3f(1,0,0);
+                                  Y = interSectionPoint%Point3f(0,1,0);
+                                  Z = interSectionPoint%Point3f(0,0,1);
+
+                                  /*
+                                     double u =X- (int)X,v = Y - (int)Y, w= Z-(int)Z;
+                                     if(u<0)	u = u+1;
+                                     if(v<0)	v = v+1;
+                                     if(w<0)	w = w+1;
+                                     */
+                                  double u =X- (int)X,v = Y - (int)Y;
+                                  if(u<0)	u = u+1;
+                                  if(v<0)	v = v+1;
+
+                                  //if(( (X>0 && X<1) && (Y>0 && Y<1) ) )   {                                  u = X; v = Y;
+                                  double u0 = triangleFace.vertices[0].texcoord.x, u1 = triangleFace.vertices[1].texcoord.x, u2 = triangleFace.vertices[2].texcoord.x ;
+                                  double v0 = triangleFace.vertices[0].texcoord.y, v1 = triangleFace.vertices[1].texcoord.y, v2 = triangleFace.vertices[2].texcoord.y ;
+
+                                  u = w0*u0 + w1*u1 + w2*u2;
+                                  v = w0*v0 + w1*v1 + w2*v2;
+                                  if(u<0)	u = u+1;
+                                  if(v<0)	v = v+1;
+                                  if(u>0)	u = u-1;
+                                  if(v>0)	v = v-1;
+
+
+                                  //if(u>1 || v>1|| u<0 || v<0)  
+                                  //  printf("absurd value: u: %f, v: %f", u,v);
+
+
+
+
+                                  u = u*projectionImageWidth,v=v*projectionImageHeight;
+                                  int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
+
+                                  //printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
+                                  //cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
+                                  //cout<< (float)pixmap[pixmapIndex]<<endl;
+                                  finalColor.red = (float)(pixmap[pixmapIndex])/maxcolor;
+                                  finalColor.green =(float)(pixmap[pixmapIndex + 1])/maxcolor;
+                                  finalColor.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
+
+
+                                //cout<<"face index of this point: ";print(interSectionPoint);cout<<endl;
+                                break;
+                              }
+
+                              //}
+                            }
+
+
+
+
 
 			    finalColor = finalColor*((GenericObject*)allObjects[winIndex])->goochShader(myray, PL);
+                            //finalColor = finalColor * shadowColor;
 				
 
 			
