@@ -99,11 +99,15 @@ class Plane: public Object
 	public:
 		
 		Point3f normalVector;
+		string id;
 		Point3f origin;
 		Color color;
-		Plane(){normalVector = Point3f(0,0,1);origin=Point3f(0,0,0);color=Color(1,0.5,0.2);objectName="Plane";KS=0;}
-		Plane(Point3f r, Point3f orig){normalVector = r; origin=orig;	objectName="Plane";normalVector.Normalize();KS=0;}
-		Plane(Point3f r, Point3f orig,Color c){normalVector = r; origin=orig; color = c; objectName="Plane";normalVector.Normalize();KS=0;}
+		Plane(){normalVector = Point3f(0,0,1);origin=Point3f(0,0,0);color=Color(1,0.5,0.2);objectName="Plane";KS=0;id="";}
+		Plane(Point3f r, Point3f orig,string ID){normalVector = r; origin=orig;	objectName="Plane";normalVector.Normalize();KS=0;id=ID;}
+		Plane(Point3f r, Point3f orig,Color c, string ID){normalVector = r; origin=orig; color = c; objectName="Plane";normalVector.Normalize();KS=0;id = ID;}
+		Plane(Point3f r, Point3f orig){normalVector = r; origin=orig;	objectName="Plane";normalVector.Normalize();KS=0;id="";}
+		Plane(Point3f r, Point3f orig,Color c){normalVector = r; origin=orig; color = c; objectName="Plane";normalVector.Normalize();KS=0;id="";}
+
 		virtual bool isEyeOutside(Point3f Pe)
 		{
 			double c=(Pe-origin)%(normalVector);
@@ -846,4 +850,222 @@ int findWinningPointIndex(vector<Point3f > myinter ,Point3f Pe)
 	return index;
 }
 
+unsigned char *pixmap1, *bumpMap, *pixmap2,*pixmap;
+//void readPPM(char *argv[])
+int projectionImageWidth, projectionImageHeight, maxcolor;
+int bumpImageWidth, bumpImageHeight, bumpmaxcolor;
+int projectionImageWidth1, projectionImageHeight1, maxcolor1;
+int projectionImageWidth2, projectionImageHeight2, maxcolor2;
 
+
+void readPPM()
+{ 
+	  int ch, bit, comment;
+	    FILE *fp;
+	    fp=fopen("texture1.ppm","r");					//open PPM file for reading
+	    //fp=fopen("red.ppm","r");					//open PPM file for reading
+	    if(fp == NULL)
+	    {
+		    printf("\n File Error!\n");
+		    exit(0);
+	    }
+	    char magic[10];	
+	    fscanf(fp, "%s", magic);
+	    if(magic[0]!='P'||magic[1]!='6')			//check the image format
+	    {
+		    printf("\n Magic file for the input file is not P6\n");
+		    exit(0);
+	    }
+	    ch=fgetc(fp);						//check for comment
+	    do {
+		    if (ch == '#');
+		    ch = fgetc(fp);
+	    } while (ch == '\n');
+	    ungetc(ch, fp);
+	    ch= fgetc(fp);
+	    while (ch == '#') 
+	    {
+		    while (fgetc(fp) != '\n') ;
+		    ch = fgetc(fp);
+	    }
+	    ungetc(ch, fp);
+	    fscanf (fp, "%d %d %d", &projectionImageWidth, &projectionImageHeight, &maxcolor);	//read image size information and maxcolor
+	    fgetc(fp);
+	    pixmap = new unsigned char[projectionImageWidth * projectionImageHeight * 3];         // Dynamic memory allocation
+	    int y, x, pixel;
+	    unsigned char red, green, blue;
+	    for(y = projectionImageHeight-1; y >= 0; y--) 
+	    {
+		    for(x = 0; x < projectionImageWidth; x++) 
+		    {
+			    fscanf(fp, "%c%c%c", &red, &green, &blue);
+			    pixel = (y * projectionImageWidth + x) * 3; 
+			    pixmap[pixel] = red;
+			    pixel++;
+			    pixmap[pixel] = green;
+			    pixel++;
+			    pixmap[pixel] = blue;
+		    }
+	    }
+	    fclose(fp);
+	    //  }  								// Close if
+
+}									// End of the function
+void readPPM1()
+{ 
+	  int ch, bit, comment;
+	    FILE *fp;
+	    fp=fopen("land1.ppm","r");					//open PPM file for reading
+	    //fp=fopen("red.ppm","r");					//open PPM file for reading
+	    if(fp == NULL)
+	    {
+		    printf("\n File Error!\n");
+		    exit(0);
+	    }
+	    char magic[10];	
+	    fscanf(fp, "%s", magic);
+	    if(magic[0]!='P'||magic[1]!='6')			//check the image format
+	    {
+		    printf("\n Magic file for the input file is not P6\n");
+		    exit(0);
+	    }
+	    ch=fgetc(fp);						//check for comment
+	    do {
+		    if (ch == '#');
+		    ch = fgetc(fp);
+	    } while (ch == '\n');
+	    ungetc(ch, fp);
+	    ch= fgetc(fp);
+	    while (ch == '#') 
+	    {	    while (fgetc(fp) != '\n') ;
+		    ch = fgetc(fp);
+	    }
+	    ungetc(ch, fp);
+	    fscanf (fp, "%d %d %d", &projectionImageWidth1, &projectionImageHeight1, &maxcolor1);	//read image size information and maxcolor
+	    fgetc(fp);
+	    pixmap1 = new unsigned char[projectionImageWidth1 * projectionImageHeight1 * 3];         // Dynamic memory allocation
+	    int y, x, pixel;
+	    unsigned char red, green, blue;
+	    for(y = projectionImageHeight1-1; y >= 0; y--) 
+	    {
+		    for(x = 0; x < projectionImageWidth1; x++) 
+		    {
+			    fscanf(fp, "%c%c%c", &red, &green, &blue);
+			    pixel = (y * projectionImageWidth1 + x) * 3; 
+			    pixmap1[pixel] = red;
+			    pixel++;
+			    pixmap1[pixel] = green;
+			    pixel++;
+			    pixmap1[pixel] = blue;
+		    }
+	    }
+	    fclose(fp);
+	    //  }  								// Close if
+
+}									// End of the function
+void readPPM2()
+{ 
+	  int ch, bit, comment;
+	    FILE *fp;
+	    fp=fopen("water20.ppm","r");					//open PPM file for reading
+	    //fp=fopen("red.ppm","r");					//open PPM file for reading
+	    if(fp == NULL)
+	    {
+		    printf("\n File Error!\n");
+		    exit(0);
+	    }
+	    char magic[10];	
+	    fscanf(fp, "%s", magic);
+	    if(magic[0]!='P'||magic[1]!='6')			//check the image format
+	    {
+		    printf("\n Magic file for the input file is not P6\n");
+		    exit(0);
+	    }
+	    ch=fgetc(fp);						//check for comment
+	    do {
+		    if (ch == '#');
+		    ch = fgetc(fp);
+	    } while (ch == '\n');
+	    ungetc(ch, fp);
+	    ch= fgetc(fp);
+	    while (ch == '#') 
+	    {
+		    while (fgetc(fp) != '\n') ;
+		    ch = fgetc(fp);
+	    }
+	    ungetc(ch, fp);
+	    fscanf (fp, "%d %d %d", &projectionImageWidth2, &projectionImageHeight2, &maxcolor2);	//read image size information and maxcolor
+	    fgetc(fp);
+	    pixmap2 = new unsigned char[projectionImageWidth2 * projectionImageHeight2 * 3];         // Dynamic memory allocation
+	    int y, x, pixel;
+	    unsigned char red, green, blue;
+	    for(y = projectionImageHeight2-1; y >= 0; y--) 
+	    {
+		    for(x = 0; x < projectionImageWidth2; x++) 
+		    {
+			    fscanf(fp, "%c%c%c", &red, &green, &blue);
+			    pixel = (y * projectionImageWidth2 + x) * 3; 
+			    pixmap2[pixel] = red;
+			    pixel++;
+			    pixmap2[pixel] = green;
+			    pixel++;
+			    pixmap2[pixel] = blue;
+		    }
+	    }
+	    fclose(fp);
+	    //  }  								// Close if
+
+}									// End of the function
+void readPPMBumpMap()
+{ 
+	  int ch, bit, comment;
+	    FILE *fp;
+	    fp=fopen("aerial1.ppm","r");					//open PPM file for reading
+	    //fp=fopen("red.ppm","r");					//open PPM file for reading
+	    if(fp == NULL)
+	    {
+		    printf("\n File Error!\n");
+		    exit(0);
+	    }
+	    char magic[10];	
+	    fscanf(fp, "%s", magic);
+	    if(magic[0]!='P'||magic[1]!='6')			//check the image format
+	    {
+		    printf("\n Magic file for the input file is not P6\n");
+		    exit(0);
+	    }
+	    ch=fgetc(fp);						//check for comment
+	    do {
+		    if (ch == '#');
+		    ch = fgetc(fp);
+	    } while (ch == '\n');
+	    ungetc(ch, fp);
+	    ch= fgetc(fp);
+	    while (ch == '#') 
+	    {
+		    while (fgetc(fp) != '\n') ;
+		    ch = fgetc(fp);
+	    }
+	    ungetc(ch, fp);
+	    fscanf (fp, "%d %d %d", &bumpImageWidth, &bumpImageHeight, &bumpmaxcolor);	//read image size information and maxcolor
+	    fgetc(fp);
+	    bumpMap= new unsigned char[bumpImageWidth * bumpImageHeight * 3];         // Dynamic memory allocation
+	    int y, x, pixel;
+	    unsigned char red, green, blue;
+	    for(y = bumpImageHeight-1; y >= 0; y--) 
+	    {
+		    for(x = 0; x < bumpImageWidth; x++) 
+		    {
+			    fscanf(fp, "%c%c%c", &red, &green, &blue);
+			    pixel = (y * bumpImageWidth + x) * 3; 
+			    bumpMap[pixel] = red;
+			    pixel++;
+			    bumpMap[pixel] = green;
+			    pixel++;
+			    bumpMap[pixel] = blue;
+		    }
+	    }
+	    fclose(fp);
+	    //  }  								// Close if
+
+	    }									// End of the function
