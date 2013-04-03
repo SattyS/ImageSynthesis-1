@@ -862,7 +862,7 @@ void readPPM()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("texture1.ppm","r");					//open PPM file for reading
+	    fp=fopen("land1.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {

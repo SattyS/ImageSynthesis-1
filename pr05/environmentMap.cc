@@ -133,14 +133,14 @@ int main (int argc, char const* argv[])
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere3));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere4));
 	
-	allObjects.push_back(dynamic_cast<Object*>(&plane1));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane1));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane3));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
-	allObjects.push_back(dynamic_cast<Object*>(&plane5));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane5));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
 
-	allObjects.push_back(dynamic_cast<Object*>(&cube));
+	//allObjects.push_back(dynamic_cast<Object*>(&cube));
 	//*/
 	Ray myray(Pe,npe);
 	int No=allObjects.size();	
@@ -249,7 +249,28 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 	    Point3f refLectedRayDirection =-1*v + 2*(n%v)*n;refLectedRayDirection.Normalize();
 	    Ray refLectedRay(interSectionPoint, refLectedRayDirection);
 	    colorFromReflectedObject = rayTracer(refLectedRay, PL,  allObjects , depth+1, spotlightEnabled ,softShadowFlag);
-	   //* 
+	   
+	    if(colorFromReflectedObject.red ==0 && colorFromReflectedObject.green ==0 && colorFromReflectedObject.blue==0)
+	    {
+		    double s0=1;
+		    double u =refLectedRayDirection.x/s0, v = refLectedRayDirection.y/s0;
+		    if(u<=0)	u = u+1;
+		    if(v<=0)	v = v+1;
+
+		    //if(( (X>0 && X<1) && (Y>0 && Y<1) ) )   {                                  u = X; v = Y;
+		    u = u*projectionImageWidth,v=v*projectionImageHeight;
+		    int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
+
+		    //printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
+		    //cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
+		    //cout<< (float)pixmap[pixmapIndex]<<endl;
+		    colorFromReflectedObject.red = (float)(pixmap[pixmapIndex])/maxcolor;
+		    colorFromReflectedObject.green =(float)(pixmap[pixmapIndex + 1])/maxcolor;
+		    colorFromReflectedObject.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
+
+	    }
+	    
+	    /* 
 	    double theta0 = acos(n%v);
 	    Color iriMultiplyColor;
 	    double iriRedValue = theta0*4*7/22.0;
@@ -382,11 +403,6 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 			    }
 			    finalColor = finalColor*shadowColor;
 			    finalColor = finalColor*(1-ks) + colorFromReflectedObject*ks;
-
-			    if(((Sphere*)allObjects[winIndex])->id==2)
-			    {
-				    //cout<<"finalColor: ";finalColor.printColor();cout<<endl;			   
-			    }
 			    return finalColor;
 		    }
 		    interSectionPoint =( interSectionPoint - ((Sphere*)allObjects[winIndex])->center);
