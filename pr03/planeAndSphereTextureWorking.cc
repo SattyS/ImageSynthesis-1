@@ -29,7 +29,7 @@ class SpotLight
 };
 
 Point3f Pe(0,0,0);      //camera or eye position
-SpotLight spotLight(Point3f(0,24,25),Point3f(0,-1,0),60.0/180.0);
+SpotLight spotLight(Point3f(0,0,0),Point3f(0,-1,0),60.0/180.0);
 
 //Point3f PL = spotLight.source;
 Point3f DirectionLight(0,-1,0);
@@ -43,7 +43,7 @@ void readPPM()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("globe.ppm","r");					//open PPM file for reading
+	    fp=fopen("tileTexture2.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -316,63 +316,69 @@ int main (int argc, char const* argv[])
 			{
 				if(spotlightEnabled)
 					finalColor = finalColor+ (((Sphere*)allObjects[winIndex])->phongShader(myray,PL))*alpha;
-				else
-					finalColor = finalColor+ ((Sphere*)allObjects[winIndex])->phongShader(myray,PL);
+				else{
+					
+					double X,Y,S0=10,S1=10,Z;
+				        S0=500;
+				        S1=S0;
+
+
+					interSectionPoint =( interSectionPoint - ((Sphere*)allObjects[winIndex])->center);
+					interSectionPoint = interSectionPoint/((Sphere*)allObjects[winIndex])->radius;
+				        
+				        X = interSectionPoint%Point3f(1,0,0);
+				        Y = interSectionPoint%Point3f(0,1,0);
+				        Z = interSectionPoint%Point3f(0,0,1);
+				        
+				        /*
+				        double u =X- (int)X,v = Y - (int)Y, w= Z-(int)Z;
+				        if(u<0)	u = u+1;
+					if(v<0)	v = v+1;
+					if(w<0)	w = w+1;
+				        */
+
+
+					//print(interSectionPoint);cout<<endl;
+					double psi = acos(Z);
+					double theta = acos( Y/(sqrt((1-(Z*Z))) )  );
+					if(abs( Y/( sqrt((1-(Z*Z)) )) > 1 )) 
+						theta = asin(X/( sqrt((1-(Z*Z))) )  );
+					if( abs(X/( sqrt((1-(Z*Z))) )) > 1 )
+						cout<<"we are doomed!\n";
+
+
+					double PI = 3.14;
+				        double v = psi/PI, u = theta/(2*PI);
+
+					//printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
+					if(X<0)	u=1-u;
+				        X = u*projectionImageWidth,Y=v*projectionImageHeight;
+				        int II = floor(X), JJ=floor(Y);
+				        double s= X - floor(X), t = Y - floor(Y);
+
+				        int pixmapIndex = abs(JJ * projectionImageWidth + II) * 3;
+				        int pixmapIndexI1 = abs(JJ * projectionImageWidth + (II+1)) * 3;
+				        int pixmapIndexJ1 = abs((JJ+1) * projectionImageWidth + II) * 3;
+				        int pixmapIndexI1J1 = abs((JJ+1) * projectionImageWidth + (II+1)) * 3;
+				        Color CIJ= Color(pixmap[pixmapIndex],pixmap[pixmapIndex+1], pixmap[pixmapIndex+2]);
+				        Color CI1J= Color(pixmap[pixmapIndexI1],pixmap[pixmapIndexI1+1], pixmap[pixmapIndexI1+2]);
+				        Color CIJ1= Color(pixmap[pixmapIndexJ1],pixmap[pixmapIndexJ1+1], pixmap[pixmapIndexJ1+2]);
+				        Color CI1J1= Color(pixmap[pixmapIndexI1J1],pixmap[pixmapIndexI1J1+1], pixmap[pixmapIndexI1J1+2]);
+
+				        finalColor = CIJ*(1-s)*(1-t) +CI1J*(s)*(1-t) +CIJ1*(1-s)*(t) +CI1J1*(s)*(t);
+				        finalColor = finalColor/255.0;
+				        finalColor = finalColor* ((Sphere*)allObjects[winIndex])->phongShader(myray,PL);
+					
+					}
 
 				if(mywinIndex!=-1 && softShadowFlag==0)
 					finalColor = finalColor+  Color(0,0,0);
 
 				if(cDirect==0)
 					finalColor = finalColor*shadowColor;
-                                double X,Y,S0=10,S1=10,Z;
-                                S0=500;
-                                S1=S0;
-
-
-				interSectionPoint =( interSectionPoint - ((Sphere*)allObjects[winIndex])->center);
-				interSectionPoint = interSectionPoint/((Sphere*)allObjects[winIndex])->radius;
                                 
-                                X = interSectionPoint%Point3f(1,0,0);
-                                Y = interSectionPoint%Point3f(0,1,0);
-                                Z = interSectionPoint%Point3f(0,0,1);
                                 
-                                /*
-                                double u =X- (int)X,v = Y - (int)Y, w= Z-(int)Z;
-                                if(u<0)	u = u+1;
-				if(v<0)	v = v+1;
-				if(w<0)	w = w+1;
-                                */
-
-
-				//print(interSectionPoint);cout<<endl;
-				double psi = acos(Z);
-				double theta = acos( Y/(sqrt((1-(Z*Z))) )  );
-				if(abs( Y/( sqrt((1-(Z*Z)) )) > 1 )) 
-					theta = asin(X/( sqrt((1-(Z*Z))) )  );
-				if( abs(X/( sqrt((1-(Z*Z))) )) > 1 )
-					cout<<"we are doomed!\n";
-
-
-				double PI = 3.14;
-                                double v = psi/PI, u = theta/(2*PI);
-
-				//printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
-				if(X<0)	u=1-u;
-                                X = u*projectionImageWidth,Y=v*projectionImageHeight;
-                                int II = floor(X), JJ=floor(Y);
-                                double s= X - floor(X), t = Y - floor(Y);
-
-                                int pixmapIndex = abs(JJ * projectionImageWidth + II) * 3;
-                                int pixmapIndexI1 = abs(JJ * projectionImageWidth + (II+1)) * 3;
-                                int pixmapIndexJ1 = abs((JJ+1) * projectionImageWidth + II) * 3;
-                                int pixmapIndexI1J1 = abs((JJ+1) * projectionImageWidth + (II+1)) * 3;
-                                Color CIJ= Color(pixmap[pixmapIndex],pixmap[pixmapIndex+1], pixmap[pixmapIndex+2]);
-                                Color CI1J= Color(pixmap[pixmapIndexI1],pixmap[pixmapIndexI1+1], pixmap[pixmapIndexI1+2]);
-                                Color CIJ1= Color(pixmap[pixmapIndexJ1],pixmap[pixmapIndexJ1+1], pixmap[pixmapIndexJ1+2]);
-                                Color CI1J1= Color(pixmap[pixmapIndexI1J1],pixmap[pixmapIndexI1J1+1], pixmap[pixmapIndexI1J1+2]);
-
-                                finalColor = CIJ*(1-s)*(1-t) +CI1J*(s)*(1-t) +CIJ1*(1-s)*(t) +CI1J1*(s)*(t);
-                                finalColor = finalColor/255.0;
+                                
 
 				//printf("red: %f , greeb: %f , blue: %f \n",finalColor.red, finalColor.green,finalColor.blue );
 

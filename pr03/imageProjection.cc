@@ -29,7 +29,7 @@ class SpotLight
 };
 
 Point3f Pe(0,0,0);      //camera or eye position
-SpotLight spotLight(Point3f(10,-5,0),Point3f(0,0,1),110.0/180.0);
+SpotLight spotLight(Point3f(10,-5,0),Point3f(0,0,1),200.0/180.0);
 
 //Point3f PL = spotLight.source;
 Point3f DirectionLight(0,-1,0);
@@ -43,7 +43,7 @@ void readPPM()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("globe.ppm","r");					//open PPM file for reading
+	    fp=fopen("texture_circle.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -136,14 +136,14 @@ int main (int argc, char const* argv[])
 	
 	Plane plane1(Point3f(0,-1,0), Point3f(0,30,0), Color(.3,0,.3));
 	Plane plane2(Point3f(-1,0,0), Point3f(30,0,0), Color(.3,1,.3));
-	Plane plane3(Point3f(0,0,-1), Point3f(0,0,60), Color(.3,1,1));
+	Plane plane3(Point3f(0,0,-1), Point3f(0,0,60), Color(.3,1,.3));
 	Plane plane4(Point3f(0,0,1), Point3f(0,0,-30), Color(0,1,0));
 	Plane plane5(Point3f(0,1,0), Point3f(0,-30,0), Color(1,0,0));
 	Plane plane6(Point3f(1,0,0), Point3f(-30,0,0), Color(1,1,0));
 
 	vector<Object*> allObjects;
 	allObjects.push_back(dynamic_cast<Object*>(&sphere1));
-	//allObjects.push_back(dynamic_cast<Object*>(&sphere2));
+	allObjects.push_back(dynamic_cast<Object*>(&sphere2));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere3));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere4));
 	
@@ -441,7 +441,7 @@ int main (int argc, char const* argv[])
                                         double X,Y,S0=10,S1=10;
                                         S0=500;
                                 S1=S0;
-                                Point3f planeNorm =  ((Plane*)allObjects[winIndex])->normalVector;
+                                //Point3f planeNorm =  ((Plane*)allObjects[winIndex])->normalVector;
                                 //X =( (interSectionPoint - ((Plane*)allObjects[winIndex])->origin)%Point3f(1,0,0))/S0; 
                                 //Y =( (interSectionPoint - ((Plane*)allObjects[winIndex])->origin)%Point3f(0,1,0))/S1; 
                                 X = (I+0.5 - P00.x)/S0;

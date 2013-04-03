@@ -45,7 +45,7 @@ void readPPM()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("texture1.ppm","r");					//open PPM file for reading
+	    fp=fopen("tileTexture2.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -98,7 +98,7 @@ void readPPMBumpMap()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("texture2.ppm","r");					//open PPM file for reading
+	    fp=fopen("texture_circle.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -205,7 +205,7 @@ int main (int argc, char const* argv[])
 	
 	//allObjects.push_back(dynamic_cast<Object*>(&plane1));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane3));
+	allObjects.push_back(dynamic_cast<Object*>(&plane3));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane5));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
@@ -483,7 +483,7 @@ int main (int argc, char const* argv[])
 					finalColor =  finalColor*shadowColor;
 
 				double X,Y,S0=10,S1=10;
-                                S0=100;
+                                S0=50;
                                 S1=S0;
                                 X =( (interSectionPoint - ((Plane*)allObjects[winIndex])->origin)%Point3f(1,0,0))/S0; 
                                 Y =( (interSectionPoint - ((Plane*)allObjects[winIndex])->origin)%Point3f(0,1,0))/S1; 

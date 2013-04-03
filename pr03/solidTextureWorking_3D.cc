@@ -129,7 +129,7 @@ int main (int argc, char const* argv[])
 	//vector<Sphere> allSpheres;
 	//allSpheres.pb(sphere1);
 	
-	Sphere sphere1(Point3f(0,0,15),10, Color(1,0.8,0),1);
+	Sphere sphere1(Point3f(0,0,15),10, Color(0.5,0.2,0.1),1);
 	Sphere sphere2(Point3f(-3,-2,10),3, Color(1,0.2,0.7),2);
 	//Sphere sphere3(Point3f(-1,5,8),3, Color(0.1,0.5,1),3);
 	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
@@ -223,7 +223,7 @@ int main (int argc, char const* argv[])
 				continue;
 			//assign that index object's color to the image
 			//shader equatoins:
-			Point3f shadowInter,rayStart = tmp[winIndex], interSectionPoint = tmp[winIndex];
+			Point3f shadowInter,rayStart = tmp[winIndex], interSectionPoint = tmp[winIndex], xpt = tmp[winIndex];
 			int flag=0;
                         Point3f NH ;
                         finalColor = Color(0,0,0);
@@ -353,18 +353,34 @@ int main (int argc, char const* argv[])
                                   finalColor.red = (float)(pixmap[pixmapIndex])/maxcolor;
                                   finalColor.green =(float)(pixmap[pixmapIndex + 1])/maxcolor;
                                   finalColor.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
+                                  
 
 
-                                                                    double col= cos(v);
+                                  int S = 1;                                
+                                  int N = ( int(xpt.x)/S + int(xpt.y)/S + int(xpt.z)/S ) % 2;
+                                  if (N == 0)
+                                  	{
+                                  		finalColor.red = 1.0;
+						finalColor.green = 1.0;
+				                finalColor.blue = 1.0;
+				        }
+				  else
+				  	{
+				  		finalColor.red = 0.5;
+						finalColor.green = 1.0;
+						finalColor.blue = 0.3;
+					}
+                                  
+                                 finalColor = finalColor * (((Sphere*)allObjects[winIndex])->phongShader(myray,PL));
+                                  
+                                  
+                                 
 
 
 				//printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
 				//cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
 				//cout<< (float)pixmap[pixmapIndex]<<endl;
-				finalColor.red = col;
-				finalColor.green = 0;
-                                finalColor.blue = col;
-                                //finalColor = finalColor*(((Sphere*)allObjects[winIndex])->phongShader(myray,PL));
+				//finalColor = finalColor*(((Sphere*)allObjects[winIndex])->lambertShader(myray,PL));
 
 
                                 }
@@ -456,15 +472,29 @@ int main (int argc, char const* argv[])
                                   u = u*projectionImageWidth,v=v*projectionImageHeight;
 				int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
 
-                                double col= sin(10*u);
+                                int S = 10;                                
+		                int N = ( int(xpt.x)/S + int(xpt.y)/S )% 2;
+		                if (N == 0)
+		                  	{
+		                  		finalColor.red = 0.3;
+						finalColor.green = 0.5;
+					        finalColor.blue = 0.8;
+					}
+				else
+				  	{
+				  		finalColor.red = 0.5;
+						finalColor.green = 0.6;
+						finalColor.blue = 0.3;
+					}
+		                  
+		                finalColor = finalColor* (((Plane*)allObjects[winIndex])->phongShader(myray,PL));
+                                
 
 
 				//printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
 				//cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
 				//cout<< (float)pixmap[pixmapIndex]<<endl;
-				finalColor.red = col;
-				finalColor.green = col;
-                                finalColor.blue = col;
+				
 
 
 					//finalColor = finalColor*((Plane*)allObjects[winIndex])->getColor();

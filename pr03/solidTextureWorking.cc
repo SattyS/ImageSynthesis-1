@@ -44,7 +44,7 @@ void readPPM()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("texture1.ppm","r");					//open PPM file for reading
+	    fp=fopen("earth4.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -97,7 +97,7 @@ void readPPMBumpMap()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("texture2.ppm","r");					//open PPM file for reading
+	    fp=fopen("sky1.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -167,7 +167,7 @@ int main (int argc, char const* argv[])
 	int Sy=(Sx*Ymax)/Xmax;
 	float x,y;
 	
-	Point3f Vview(0,0,1),Vup(0,1,0);	// point the view vector to focus on a particular point from Pe
+	Point3f Vview(15,0,15),Vup(0,1,0);	// point the view vector to focus on a particular point from Pe
 	//Vview = Vview - Pe;
 	Vview.Normalize();
 	//Vup.Normalize();
@@ -182,12 +182,12 @@ int main (int argc, char const* argv[])
 	//vector<Sphere> allSpheres;
 	//allSpheres.pb(sphere1);
 	
-	Sphere sphere1(Point3f(0,0,15),10, Color(1,0.8,0),1);
+	Sphere sphere1(Point3f(15,0,15),10, Color(1,0.8,0),1);
 	Sphere sphere2(Point3f(-3,-2,10),3, Color(1,0.2,0.7),2);
 	//Sphere sphere3(Point3f(-1,5,8),3, Color(0.1,0.5,1),3);
 	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
 	
-	Plane plane1(Point3f(0,-1,0), Point3f(0,30,0), Color(.3,0,.3));
+	Plane plane1(Point3f(0,-1,0), Point3f(0,30,0), Color(1,0,0));
 	Plane plane2(Point3f(-1,0,0), Point3f(30,0,0), Color(.3,1,.3));
 	Plane plane3(Point3f(0,0,-1), Point3f(0,0,60), Color(.3,1,1));
 	Plane plane4(Point3f(0,0,1), Point3f(0,0,-30), Color(0,1,0));
@@ -202,7 +202,7 @@ int main (int argc, char const* argv[])
 	
 	//allObjects.push_back(dynamic_cast<Object*>(&plane1));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
-	allObjects.push_back(dynamic_cast<Object*>(&plane3));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane3));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane5));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
@@ -406,7 +406,36 @@ int main (int argc, char const* argv[])
                                   finalColor.red = (float)(pixmap[pixmapIndex])/maxcolor;
                                   finalColor.green =(float)(pixmap[pixmapIndex + 1])/maxcolor;
                                   finalColor.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
+                                 /* double psi = acos(Z);
+                                  double theta = acos( Y/(sqrt((1-(Z*Z))) )  );
+				if(abs( Y/( sqrt((1-(Z*Z)) )) > 1 )) 
+					theta = asin(X/( sqrt((1-(Z*Z))) )  );
+				if( abs(X/( sqrt((1-(Z*Z))) )) > 1 )
+					cout<<"we are doomed!\n";
 
+
+				double PI = 3.14;
+                                v = psi/PI, u = theta/(2*PI);
+
+				//printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
+				if(X<0)	u=1-u;
+                                X = u*projectionImageWidth,Y=v*projectionImageHeight;
+                                int II = floor(X), JJ=floor(Y);
+                                double s= X - floor(X), t = Y - floor(Y);
+
+                                pixmapIndex = abs(JJ * projectionImageWidth + II) * 3;
+                                int pixmapIndexI1 = abs(JJ * projectionImageWidth + (II+1)) * 3;
+                                int pixmapIndexJ1 = abs((JJ+1) * projectionImageWidth + II) * 3;
+                                int pixmapIndexI1J1 = abs((JJ+1) * projectionImageWidth + (II+1)) * 3;
+                                Color CIJ= Color(pixmap[pixmapIndex],pixmap[pixmapIndex+1], pixmap[pixmapIndex+2]);
+                                Color CI1J= Color(pixmap[pixmapIndexI1],pixmap[pixmapIndexI1+1], pixmap[pixmapIndexI1+2]);
+                                Color CIJ1= Color(pixmap[pixmapIndexJ1],pixmap[pixmapIndexJ1+1], pixmap[pixmapIndexJ1+2]);
+                                Color CI1J1= Color(pixmap[pixmapIndexI1J1],pixmap[pixmapIndexI1J1+1], pixmap[pixmapIndexI1J1+2]);
+
+                                finalColor = CIJ*(1-s)*(1-t) +CI1J*(s)*(1-t) +CIJ1*(1-s)*(t) +CI1J1*(s)*(t);
+                                finalColor = finalColor/255.0;
+
+*/
 
                                   finalColor = finalColor*(((Sphere*)allObjects[winIndex])->phongShader(myray,PL));
                                 }

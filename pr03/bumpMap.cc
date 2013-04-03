@@ -45,7 +45,7 @@ void readPPM()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("cube.ppm","r");					//open PPM file for reading
+	    fp=fopen("tile1.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -98,7 +98,7 @@ void readPPMBumpMap()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("normal1.ppm","r");					//open PPM file for reading
+	    fp=fopen("normal3.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -455,7 +455,7 @@ int main (int argc, char const* argv[])
                                   nh=(Ph - Pc);nh.Normalize();
 
                                   nh = Nh;
-                                  nh.Normalize();
+                                  //nh.Normalize();
 
                                   nlh=(PL - Ph);nlh.Normalize();
 
