@@ -82,7 +82,7 @@ int main (int argc, char const* argv[])
 	int Sy=(Sx*Ymax)/Xmax;
 	float x,y;
 	
-	Point3f Vview(0,0,20),Vup(0,1,0);	// point the view vector to focus on a particular point from Pe
+	Point3f Vview(0,50,10),Vup(0,1,0);	// point the view vector to focus on a particular point from Pe
 	//Vview = Point3f(0,0,1);
 	//Vview = Vview - Pe;
 	Vview.Normalize();
@@ -91,7 +91,7 @@ int main (int argc, char const* argv[])
 	n0.Normalize();
 	Point3f n1=n0^n2;
 	n1.Normalize();
-	int d=3;
+	int d=10;
 	Point3f npe=Pe,Pcenter=Pe+d*n2;
 	npe.Normalize();//print(npe);
 	Point3f P00=Pcenter-(Sx/2)*n0-(Sy/2)*n1,Pp;
@@ -106,17 +106,17 @@ int main (int argc, char const* argv[])
 	genericObjFileName = "cube_oriented.obj";
 	 //char *objfilename = "tetrahedron.obj";
 
-	Sphere sphere1(Point3f(0,0,20),15, Color(0,0.8,1),1,1.0);
-	Sphere sphere2(Point3f(-15,-3,25),10, Color(1,0.2,0.7),2,0);
+	Sphere sphere1(Point3f(0,50,10),15, Color(0,0.8,1),1,1.0);
+	Sphere sphere2(Point3f(15,-3,55),10, Color(1,0.2,0.7),2,0);
 	Sphere sphere3(Point3f(-3,20,35),15, Color(0.1,0.5,1),3,0.8);
 	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
 	
-	Plane plane1(Point3f(0,-1,0), Point3f(0,80,0), Color(1,1,1), "roof");
-	Plane plane2(Point3f(-1,0,0), Point3f(80,0,0), Color(1,0,0), "left" );
-	Plane plane3(Point3f(0,0,-1), Point3f(0,0,90), Color(0,1,1), "front");
-	Plane plane4(Point3f(0,0,1), Point3f(0,0,-80), Color(0,0,0), "back");
-	Plane plane5(Point3f(0,1,0), Point3f(0,-10,0), Color(1,1,1), "floor");
-	Plane plane6(Point3f(1,0,0), Point3f(-80,0,0), Color(0,1,0), "right");
+	Plane plane1(Point3f(0,-1,0), Point3f(0,180,0), Color(1,1,1), "roof");
+	Plane plane2(Point3f(-1,0,0), Point3f(180,0,0), Color(1,0,0), "left" );
+	Plane plane3(Point3f(0,0,-1), Point3f(10000,100000,190), Color(0,1,1), "front");
+	Plane plane4(Point3f(0,0,1), Point3f(0,0,-180), Color(0,0,0), "back");
+	Plane plane5(Point3f(0,1,0), Point3f(0,-110,0), Color(1,1,1), "floor");
+	Plane plane6(Point3f(1,0,0), Point3f(-180,0,0), Color(0,1,0), "right");
 
 	//cout<<"debug/////";
 	GenericObject cube(genericObjFileName,1.0);
@@ -159,7 +159,6 @@ int main (int argc, char const* argv[])
 	}
 	cout<<"EEye and light are outside all the object \n";
 	
-	
 	vector<Point3f> lights;
         lights.pb(Point3f(10,24,30));
         lights.pb(Point3f(-10,24,30));
@@ -183,9 +182,52 @@ int main (int argc, char const* argv[])
 
 			Pp=P00+(x*Sx)*n0+(y*Sy)*n1;	//Direction to shoot the ray
 			myray=Ray(Pe, Pp);	// This is the ray that we will shoot from camera to find out the color at pixel x,y
-			
+		/*	
+                        Point3f n=allObjects[winIndex]->getNormal(interSectionPoint);n.Normalize();
+                        Point3f v= interSectionPoint-Pe;v.Normalize();
+                        v = myray.direction;v.Normalize();v=-1*v;
+                        Point3f refLectedRayDirection =-1*v + 2*(n%v)*n;refLectedRayDirection.Normalize();
+
+                        */
+
 			finalColor = rayTracer(myray, PL,  allObjects , 0,spotlightEnabled ,softShadowFlag);
-			
+
+                        Point3f refLectedRayDirection =myray.direction ;refLectedRayDirection.Normalize();
+                        Color colorFromReflectedObject = finalColor;
+                        if(colorFromReflectedObject.red ==0 && colorFromReflectedObject.green ==0 && colorFromReflectedObject.blue==0)
+                        {
+                          double s0=1;
+                          double X = refLectedRayDirection.x/s0 , Y = refLectedRayDirection.y/s0, Z = refLectedRayDirection.z/s0;
+
+                          double psi = acos(Z);
+                          double theta = acos( Y/(float)(sqrt((1-(Z*Z))) )  );
+                          if(abs( Y/( sqrt((1-(Z*Z)) )) > 1.0 )) 
+                            theta = asin(X/( sqrt((1-(Z*Z))) )  );
+                          if( abs(X/( sqrt((1-(Z*Z))) )) > 1 )
+                            cout<<"we are doomed!\n";
+
+
+                          double PI = 3.14;
+                          double v = psi/PI, u = theta/(2*PI);
+
+                          if(X<0)	{u = 1-u;//v=1-v;//cout<<"adfioubnwirgnw";
+                          }
+                          //if(v<0)	v = v+1;
+
+                          //if(( (X>0 && X<1) && (Y>0 && Y<1) ) )   {                                  u = X; v = Y;
+                          u = u*projectionImageWidth,v=v*projectionImageHeight;
+                          int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
+
+                          // printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
+                          //cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
+                          //cout<< (float)pixmap[pixmapIndex]<<endl;
+                          colorFromReflectedObject.red = (float)(pixmap[pixmapIndex])/maxcolor;
+                          colorFromReflectedObject.green =(float)(pixmap[pixmapIndex + 1])/maxcolor;
+                          colorFromReflectedObject.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
+
+                          finalColor = colorFromReflectedObject;
+                        }
+
 			pixels[index].r=finalColor.red;
 			pixels[index].g=finalColor.green;
 			pixels[index].b=finalColor.blue;
@@ -253,15 +295,37 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 	    if(colorFromReflectedObject.red ==0 && colorFromReflectedObject.green ==0 && colorFromReflectedObject.blue==0)
 	    {
 		    double s0=1;
-		    double u =refLectedRayDirection.x/s0, v = refLectedRayDirection.y/s0;
-		    if(u<=0)	u = u+1;
-		    if(v<=0)	v = v+1;
+                    double X = refLectedRayDirection.x/s0 , Y = refLectedRayDirection.y/s0, Z = refLectedRayDirection.z/s0;
+
+                    double psi = acos(Z);
+                    double theta = acos((double)( Y/(double)(sqrt((1.0-(Z*Z))) )  ) );
+
+                    if(abs( Y/( sqrt((1-(Z*Z)) ))>1.0 )) 
+                    {
+                      //cout<<"something is happenning============================================================================ \n";
+                      theta = asin(X/( sqrt((1-(Z*Z))) )  );
+                    }
+                    else if( abs(X/( sqrt((1-(Z*Z))) )) > 1 )
+                    {
+                      theta =0;
+                      cout<<"we are doomed!\n";
+                    }
+
+
+
+                    double PI = 3.14;
+                    double v = psi/PI, u = theta/(2*PI);
+
+                    if(X<0)	{u = 1-u;//v=1-v;//cout<<"adfioubnwirgnw";
+                    }
+		    //if(v<0)	v = v+1;
 
 		    //if(( (X>0 && X<1) && (Y>0 && Y<1) ) )   {                                  u = X; v = Y;
 		    u = u*projectionImageWidth,v=v*projectionImageHeight;
 		    int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
 
 		    //printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
+		    //printf("X: %f , Y: %f , Z: %f, theta: %e \n",X, Y, Z,( Y/(sqrt((1-(Z*Z))) )  ));
 		    //cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
 		    //cout<< (float)pixmap[pixmapIndex]<<endl;
 		    colorFromReflectedObject.red = (float)(pixmap[pixmapIndex])/maxcolor;
@@ -468,7 +532,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 
 		    double X,Y,S0=10,S1=10;
 		    // Edit the below line.. set S0 to 500 for just one picture.
-		    S0=100;
+		    S0=500;
 		    S1=S0;
 		    Point3f planeNorm =  ((Plane*)allObjects[winIndex])->normalVector;
 		    planeNorm.Normalize();
