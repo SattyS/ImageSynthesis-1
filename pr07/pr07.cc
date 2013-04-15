@@ -43,9 +43,10 @@ class SpotLight
 };
 
 Point3f Pe(0,0,0);      //camera or eye position
-SpotLight spotLight(Point3f(0,20,15),Point3f(0,0,1),60.0/180.0);
+SpotLight spotLight(Point3f(0,10,5),Point3f(0,0,1),60.0/180.0);
 //Enable each variable to enable textures on them
 bool sphereTextureEnabled=false, genericTextureEnabled=false,planeTextureEnabled=true, textureRefractionMapEnabled=false;
+bool glossyEnabled=1;
 //Point3f PL = spotLight.source;
 Point3f DirectionLight(0,-1,0);
 
@@ -60,11 +61,11 @@ void printVector(obj_vector *v)
 }
 
 */
-int numRecursion = 4;
+int numRecursion = 10;
 Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth, bool spotlightEnabled ,int softShadowFlag);
 int main (int argc, char const* argv[])
 {
-	int antiAliasing=0;
+	int antiAliasing=1;
     bool spotlightEnabled=false;
 	
 	int Xmax = 500;
@@ -77,7 +78,7 @@ int main (int argc, char const* argv[])
 	readPPMBumpMap();
 	
 	RGBType *pixels= new RGBType[n];
-	int index=0,M=2,N=2; 
+	int index=0,M=4,N=4; 
 	int Sx=10,winIndex=0;
 	int Sy=(Sx*Ymax)/Xmax;
 	float x,y;
@@ -105,9 +106,9 @@ int main (int argc, char const* argv[])
 	genericObjFileName = "cube_oriented.obj";
 	 //char *objfilename = "tetrahedron.obj";
 
-	Sphere sphere1(Point3f(5,-10,15),7, Color(0,1,1),1,0 , 1.33);
-	Sphere sphere2(Point3f(0,-20,45),20, Color(1,0.2,0.3),2,1, 0);
-	Sphere sphere3(Point3f(0,20,35),10, Color(0.1,0.5,1),3,0, 1.33);
+	Sphere sphere1(Point3f(-10,0,15),5, Color(0,1,1),1,0.9 , 0);
+	Sphere sphere2(Point3f(0,0,15),5, Color(1,0.2,0.3),2,0.9, 0);
+	Sphere sphere3(Point3f(10,0,15),5, Color(0.1,0.5,1),3,0.9, 0);
 	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
 	
 	Plane plane1(Point3f(0,-1,0), Point3f(0,40,0), Color(1,1,1), "roof", 0,0);
@@ -127,10 +128,11 @@ int main (int argc, char const* argv[])
 	//cout<<"debug/////";
 
 	vector<Object*> allObjects;
-	allObjects.push_back(dynamic_cast<Object*>(&cube));
-	//allObjects.push_back(dynamic_cast<Object*>(&sphere1));
-	//allObjects.push_back(dynamic_cast<Object*>(&sphere2));
-	//allObjects.push_back(dynamic_cast<Object*>(&sphere3));
+	//allObjects.push_back(dynamic_cast<Object*>(&cube));
+	
+	allObjects.push_back(dynamic_cast<Object*>(&sphere1));
+	allObjects.push_back(dynamic_cast<Object*>(&sphere2));
+	allObjects.push_back(dynamic_cast<Object*>(&sphere3));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere4));
 	
 	allObjects.push_back(dynamic_cast<Object*>(&plane1));
@@ -170,19 +172,32 @@ int main (int argc, char const* argv[])
 	//tmp.resize(2);
 	Color finalColor(0,0,0);
 	bool isOnePicture =true;
-        for (float ior = 1.3; ior<=1.34;)
+        for (float ior = 0; ior<=0;)
         {
           allObjects[0]->eta = ior;
             for (int I = 0; I < Xmax; I++)
 	{
 		for (int J = 0; J < Ymax; J++)
 		{
-			index=J*Xmax + I;
 			// shooting rays from center of the pizel
-
+			for (int p = 0; p < M; p++)
+			{
+				for (int q = 0; q < N; q++)
+				{
 			x=(I+0.5)/Xmax;
 			y=(J+0.5)/Ymax;
-
+			if(antiAliasing!=1)
+			{
+				x=(I+0.5)/Xmax;
+				y=(J+0.5)/Ymax;
+			}
+			else
+			{
+				rnd=(float)((float)(rand()%100)/(100.0));
+				x=(I+(p/M)+((rnd)/M))/Xmax;
+				y=(J+(q/N)+((rnd)/N))/Ymax;
+			}
+			index=J*Xmax + I;
 			Pp=P00+(x*Sx)*n0+(y*Sy)*n1;	//Direction to shoot the ray
 			myray=Ray(Pe, Pp);	// This is the ray that we will shoot from camera to find out the color at pixel x,y
 			
@@ -227,9 +242,24 @@ int main (int argc, char const* argv[])
 
                         }	
                         // */
-			pixels[index].r=finalColor.red;
-			pixels[index].g=finalColor.green;
-			pixels[index].b=finalColor.blue;
+			if(antiAliasing==1)
+			{
+				pixels[index].r=finalColor.red;  
+				pixels[index].g=finalColor.green;
+				pixels[index].b=finalColor.blue; 
+
+			}
+			else
+			{
+				pixels[index].r+=finalColor.red/(M*N);
+				pixels[index].g+=finalColor.green/(M*N);
+				pixels[index].b+=finalColor.blue/(M*N);
+			}
+			}
+			}
+			//pixels[index].r=finalColor.red;
+			//pixels[index].g=finalColor.green;
+			//pixels[index].b=finalColor.blue;
 		}
 	}
         
@@ -286,7 +316,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
     Color colorFromReflectedObject(0,0,0);
     Color colorFromRefractedObject(0,0,0);
     double ks=allObjects[winIndex]->KS;
-    float rnd1 = -1 + 2*(rand()/float(RAND_MAX)),rnd2 = -1 + 2*(rand()/float(RAND_MAX)),rnd3 = -1 + 2*(rand()/float(RAND_MAX)) ;
+    float rnd1 =-1 + 2*(rand()/float(RAND_MAX)),rnd2 = -1 + 2*(rand()/float(RAND_MAX)),rnd3 = -1 + 2*(rand()/float(RAND_MAX)) ;
     
     if(depth<numRecursion && ks!=0)
     {
@@ -295,9 +325,19 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 	    v = myray.direction;v.Normalize();v=-1*v;
             // for reflection
 	    // for glossy 
+	    float glossyS = 0;
+	    if(allObjects[winIndex]->objectName=="Sphere" )	
+	    {
+		    if(((Sphere*)allObjects[winIndex])->id==2)
+			    glossyS=0.5;
+		    if(((Sphere*)allObjects[winIndex])->id==3)
+			    glossyS=0.8;
+	    }
 	    Point3f Vrand(rnd1,rnd2,rnd3);
+	    Vrand = glossyS*Vrand;
 	    Point3f refLectedRayDirection =-1*v + 2*(n%v)*n;
-	    refLectedRayDirection = refLectedRayDirection + Vrand;
+	    if(glossyEnabled)
+		    refLectedRayDirection = refLectedRayDirection + Vrand;
 	    refLectedRayDirection.Normalize();
 	    Ray refLectedRay(interSectionPoint, refLectedRayDirection);
             colorFromReflectedObject = rayTracer(refLectedRay, PL,  allObjects , depth+1, spotlightEnabled ,softShadowFlag); 
@@ -340,7 +380,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 		    colorFromReflectedObject.green =(float)(pixmap[pixmapIndex + 1])/maxcolor;
 		    colorFromReflectedObject.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
             }
-            //*/
+            // */
 
 
     }
@@ -549,7 +589,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
                             //cout<<"eta: "<<eta<<endl;
                             //cout<<"colorFromRefractedObject: "; colorFromRefractedObject.printColor();cout<<endl;
 			    if(ks!=0 || eta!=0)
-                            finalColor = (colorFromRefractedObject*(1-ks) + colorFromReflectedObject*ks);
+                            finalColor =(colorFromRefractedObject*(1-ks) + colorFromReflectedObject*ks);
                             //cout<<"finalColor: "; finalColor.printColor();cout<<endl;
 			    /*
                              * float myalpha = 0.3;
@@ -624,7 +664,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 			    finalColor = finalColor+  Color(0,0,0);
 		    if(cDirect==0){
 
-			    //finalColor =  finalColor*shadowColor;
+			    finalColor =  finalColor*shadowColor;
                       }
 
 		    if(!planeTextureEnabled){

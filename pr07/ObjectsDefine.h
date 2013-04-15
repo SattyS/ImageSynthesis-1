@@ -1012,7 +1012,7 @@ void readPPM()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("hazard.ppm","r");					//open PPM file for reading
+	    fp=fopen("water11.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -1065,7 +1065,7 @@ void readPPM1()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("hazard.ppm","r");					//open PPM file for reading
+	    fp=fopen("water11.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -1117,7 +1117,7 @@ void readPPM2()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("hazard.ppm","r");					//open PPM file for reading
+	    fp=fopen("tex1.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -1170,7 +1170,7 @@ void readPPMBumpMap()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("hazard.ppm","r");					//open PPM file for reading
+	    fp=fopen("water11.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
