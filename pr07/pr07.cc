@@ -102,7 +102,7 @@ int main (int argc, char const* argv[])
 	//printf("%s", genericObjFileName.c_str());
 	
 	string genericObjFileName="cube_00.obj";
-	genericObjFileName = "tou.obj";
+	genericObjFileName = "cube_oriented.obj";
 	 //char *objfilename = "tetrahedron.obj";
 
 	Sphere sphere1(Point3f(5,-10,15),7, Color(0,1,1),1,0 , 1.33);
@@ -134,11 +134,11 @@ int main (int argc, char const* argv[])
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere4));
 	
 	allObjects.push_back(dynamic_cast<Object*>(&plane1));
-	allObjects.push_back(dynamic_cast<Object*>(&plane2));
-	allObjects.push_back(dynamic_cast<Object*>(&plane3));
-	allObjects.push_back(dynamic_cast<Object*>(&plane4));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane3));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
 	allObjects.push_back(dynamic_cast<Object*>(&plane5));
-	allObjects.push_back(dynamic_cast<Object*>(&plane6));
+	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
 
 	//*/
 	Ray myray(Pe,npe);
@@ -286,13 +286,19 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
     Color colorFromReflectedObject(0,0,0);
     Color colorFromRefractedObject(0,0,0);
     double ks=allObjects[winIndex]->KS;
+    float rnd1 = -1 + 2*(rand()/float(RAND_MAX)),rnd2 = -1 + 2*(rand()/float(RAND_MAX)),rnd3 = -1 + 2*(rand()/float(RAND_MAX)) ;
+    
     if(depth<numRecursion && ks!=0)
     {
 	    Point3f n=allObjects[winIndex]->getNormal(interSectionPoint);n.Normalize();
 	    Point3f v= interSectionPoint-Pe;v.Normalize();
 	    v = myray.direction;v.Normalize();v=-1*v;
             // for reflection
-	    Point3f refLectedRayDirection =-1*v + 2*(n%v)*n;refLectedRayDirection.Normalize();
+	    // for glossy 
+	    Point3f Vrand(rnd1,rnd2,rnd3);
+	    Point3f refLectedRayDirection =-1*v + 2*(n%v)*n;
+	    refLectedRayDirection = refLectedRayDirection + Vrand;
+	    refLectedRayDirection.Normalize();
 	    Ray refLectedRay(interSectionPoint, refLectedRayDirection);
             colorFromReflectedObject = rayTracer(refLectedRay, PL,  allObjects , depth+1, spotlightEnabled ,softShadowFlag); 
 	    
