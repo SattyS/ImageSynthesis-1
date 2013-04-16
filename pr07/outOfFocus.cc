@@ -46,7 +46,7 @@ Point3f Pe(0,0,0);      //camera or eye position
 SpotLight spotLight(Point3f(0,10,5),Point3f(0,0,1),60.0/180.0);
 //Enable each variable to enable textures on them
 bool sphereTextureEnabled=false, genericTextureEnabled=false,planeTextureEnabled=true, textureRefractionMapEnabled=false;
-bool glossyEnabled=1;
+bool glossyEnabled=0;
 //Point3f PL = spotLight.source;
 Point3f DirectionLight(0,-1,0);
 
@@ -92,10 +92,12 @@ int main (int argc, char const* argv[])
 	n0.Normalize();
 	Point3f n1=n0^n2;
 	n1.Normalize();
-	int d=10;
-	Point3f npe=Pe,Pcenter=Pe+d*n2;
+	int d=10,f=20;
+	int lx=10,ly=(lx*Ymax)/Xmax;
+	Point3f npe=Pe,Pcenter=Pe+d*n2 , PcenterLens = Pe;
 	npe.Normalize();//print(npe);
 	Point3f P00=Pcenter-(Sx/2)*n0-(Sy/2)*n1,Pp;
+	Point3f P00Lens=PcenterLens-(lx/2)*n0-(ly/2)*n1, PeLens;
 
 	//vector<Sphere> allSpheres;
 	//allSpheres.pb(sphere1);
@@ -172,6 +174,7 @@ int main (int argc, char const* argv[])
 	//tmp.resize(2);
 	Color finalColor(0,0,0);
 	bool isOnePicture =true;
+	float xLens =0, yLens=0;
         for (float ior = 0; ior<=0;)
         {
           allObjects[0]->eta = ior;
@@ -179,6 +182,8 @@ int main (int argc, char const* argv[])
 	{
 		for (int J = 0; J < Ymax; J++)
 		{
+			int rndx1=rand()%M, rndy1=rand()%N;
+			int rndx2=rand()%M, rndy2=rand()%N;
 			// shooting rays from center of the pizel
 			for (int p = 0; p < M; p++)
 			{
@@ -190,16 +195,22 @@ int main (int argc, char const* argv[])
 			{
 				x=(I+0.5)/Xmax;
 				y=(J+0.5)/Ymax;
+
 			}
 			else
 			{
 				rnd=(float)((float)(rand()%100)/(100.0));
-				x=(I+(p/M)+((rnd)/M))/Xmax;
-				y=(J+(q/N)+((rnd)/N))/Ymax;
+				x=(I+( ((p+rndx1)%M)/M) +((rnd)/M))/Xmax;
+				y=(J+( ((q+rndy1)%N)/N) +((rnd)/N))/Ymax;
+				xLens=(I+( ((p+rndx2)%M)/M) +((rnd)/M))/Xmax;
+				yLens=(J+( ((q+rndy2)%N)/N) +((rnd)/N))/Ymax;
 			}
 			index=J*Xmax + I;
 			Pp=P00+(x*Sx)*n0+(y*Sy)*n1;	//Direction to shoot the ray
-			myray=Ray(Pe, Pp);	// This is the ray that we will shoot from camera to find out the color at pixel x,y
+			PeLens=P00Lens+(xLens*lx)*n0+(yLens*ly)*n1;	//Direction to shoot the ray from lens sample point
+			Pe = PeLens;
+			myray=Ray(PeLens, Pp);	// This is the ray that we will shoot from camera to find out the color at pixel x,y
+			//myrar = Ray( samplepoint from lens, P [intersection point with focal plane] )
 			
 			finalColor = rayTracer(myray, PL,  allObjects , 0,spotlightEnabled ,softShadowFlag);
                         
