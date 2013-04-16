@@ -93,7 +93,7 @@ int main (int argc, char const* argv[])
 	Point3f n1=n0^n2;
 	n1.Normalize();
 	int d=10,f=20;
-	int lx=10,ly=(lx*Ymax)/Xmax;
+	int lx=20,ly=(lx*Ymax)/Xmax;
 	Point3f npe=Pe,Pcenter=Pe+d*n2 , PcenterLens = Pe;
 	npe.Normalize();//print(npe);
 	Point3f P00=Pcenter-(Sx/2)*n0-(Sy/2)*n1,Pp;
@@ -108,9 +108,9 @@ int main (int argc, char const* argv[])
 	genericObjFileName = "cube_oriented.obj";
 	 //char *objfilename = "tetrahedron.obj";
 
-	Sphere sphere1(Point3f(-15,-20,65),15, Color(0,1,1),1,0.9 , 0);
+	Sphere sphere1(Point3f(-15,-20,65),10, Color(0,1,1),1,0.9 , 0);
 	Sphere sphere2(Point3f(0,-20,150),5, Color(1,0.2,0.3),2,0.9, 0);
-	Sphere sphere3(Point3f(15,-20,65),15, Color(0.1,0.5,1),3,0.9, 0);
+	Sphere sphere3(Point3f(15,-20,65),10, Color(0.1,0.5,1),3,0.9, 0);
 	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
 	
 	Plane plane1(Point3f(0,-1,0), Point3f(0,40,0), Color(1,1,1), "roof", 0,0);
@@ -209,7 +209,12 @@ int main (int argc, char const* argv[])
 			Pp=P00+(x*Sx)*n0+(y*Sy)*n1;	//Direction to shoot the ray
 			PeLens=P00Lens+(xLens*lx)*n0+(yLens*ly)*n1;	//Direction to shoot the ray from lens sample point
 			Pe = PeLens;
-			myray=Ray(PeLens, Pp);	// This is the ray that we will shoot from camera to find out the color at pixel x,y
+			Point3f dirToShoot= Pp - PeLens;
+			dirToShoot.Normalize();
+			myray=Ray(PeLens, dirToShoot );	// This is the ray that we will shoot from camera to find out the color at pixel x,y
+			//cout<<"Plens: ";print(PeLens);cout<<endl;
+			//cout<<"Pp: ";print(Pp);cout<<endl;
+
 			//myrar = Ray( samplepoint from lens, P [intersection point with focal plane] )
 			
 			finalColor = rayTracer(myray, PL,  allObjects , 0,spotlightEnabled ,softShadowFlag);
@@ -218,7 +223,7 @@ int main (int argc, char const* argv[])
                         Color colorFromReflectedObject = finalColor;
 			// comment the following line for ENVIRONMENT MAP:
 
-                        //*                         
+                        /*                         
                         if(colorFromReflectedObject.red ==0 && colorFromReflectedObject.green ==0 && colorFromReflectedObject.blue==0)
                         {
                           double s0=1;
@@ -378,7 +383,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 		    colorFromReflectedObject = (colorFromReflectedObject + rayTracer(refLectedRay, PL,  allObjects , depth+1, spotlightEnabled ,softShadowFlag))/1.0; 
 
 	    // comment the following line for ENVIRONMENT MAP:
-	    //*
+	    /*
               if(colorFromReflectedObject.red ==0 && colorFromReflectedObject.green ==0 && colorFromReflectedObject.blue==0)
 	    {
 		    double s0=1;
@@ -402,14 +407,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 			    theta = acos((double)( Y/(double)(sqrt((1.0-(Z*Z))) )  ) );
 
 
-		    /*
-                    else if( (X/( sqrt((1-(Z*Z))) )) > 1.0 || (X/( sqrt((1-(Z*Z))) )) <-1.0 )
-                    {
-                      theta =0;
-                      cout<<"we are doomed!\n";
-                    }
-		    */
-                    double PI = 3.14;
+		                       double PI = 3.14;
                     double v = psi/PI, u = theta/(2*PI);
 
                     if(X<0)	{u = 1-u;//v=1-v;//cout<<"adfioubnwirgnw";
