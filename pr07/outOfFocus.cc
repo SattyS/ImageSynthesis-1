@@ -45,7 +45,7 @@ class SpotLight
 Point3f Pe(0,0,0);      //camera or eye position
 SpotLight spotLight(Point3f(0,10,5),Point3f(0,0,1),60.0/180.0);
 //Enable each variable to enable textures on them
-bool sphereTextureEnabled=false, genericTextureEnabled=false,planeTextureEnabled=true, textureRefractionMapEnabled=false;
+bool sphereTextureEnabled=false, genericTextureEnabled=false,planeTextureEnabled=false, textureRefractionMapEnabled=false;
 bool glossyEnabled=0;
 //Point3f PL = spotLight.source;
 Point3f DirectionLight(0,-1,0);
@@ -78,12 +78,12 @@ int main (int argc, char const* argv[])
 	readPPMBumpMap();
 	
 	RGBType *pixels= new RGBType[n];
-	int index=0,M=2,N=2; 
+	int index=0,M=2,N=M; 
 	int Sx=10,winIndex=0;
 	int Sy=(Sx*Ymax)/Xmax;
 	float x,y;
 	
-	Point3f Vview(0,-20,65),Vup(0,1,0);	// point the view vector to focus on a particular point from Pe
+	Point3f Vview(0,0,65),Vup(0,1,0);	// point the view vector to focus on a particular point from Pe
 	//Vview = Point3f(0,0,1);
 	//Vview = Vview - Pe;
 	Vview.Normalize();
@@ -108,16 +108,16 @@ int main (int argc, char const* argv[])
 	genericObjFileName = "cube_oriented.obj";
 	 //char *objfilename = "tetrahedron.obj";
 
-	Sphere sphere1(Point3f(-15,-20,65),10, Color(0,1,1),1,0.9 , 0);
-	Sphere sphere2(Point3f(0,-20,150),5, Color(1,0.2,0.3),2,0.9, 0);
-	Sphere sphere3(Point3f(15,-20,65),10, Color(0.1,0.5,1),3,0.9, 0);
+	Sphere sphere1(Point3f(-10,0,85),10, Color(0,1,1),1,0.9 , 0);
+	Sphere sphere2(Point3f(0,0,150),5, Color(1,0.2,0.3),2,0.9, 0);
+	Sphere sphere3(Point3f(10,0,65),10, Color(0.1,0.5,1),3,0.9, 0);
 	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
 	
 	Plane plane1(Point3f(0,-1,0), Point3f(0,40,0), Color(1,1,1), "roof", 0,0);
 	Plane plane2(Point3f(-1,0,0), Point3f(60,0,0), Color(1,0,0), "left", 0,0);
-	Plane plane3(Point3f(0,0,-1), Point3f(0,0,60), Color(1,1,1), "front",0,0);
+	Plane plane3(Point3f(0,0,-1), Point3f(0,0,100), Color(1,0.5,0.5), "front",0,0);
 	Plane plane4(Point3f(0,0,1), Point3f(0,0,-80), Color(0,0,0), "back", 0,0);
-	Plane plane5(Point3f(0,1,0), Point3f(0,-50,0), Color(1,1,1), "floor",0,0);
+	Plane plane5(Point3f(0,1,0), Point3f(0,-50,0), Color(1,0,1), "floor",0,0);
 	Plane plane6(Point3f(1,0,0), Point3f(-60,0,0), Color(0,1,0), "right",0,0);
 
 	//cout<<"debug/////";
@@ -137,12 +137,12 @@ int main (int argc, char const* argv[])
 	allObjects.push_back(dynamic_cast<Object*>(&sphere3));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere4));
 	
-	//allObjects.push_back(dynamic_cast<Object*>(&plane1));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane3));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
+	allObjects.push_back(dynamic_cast<Object*>(&plane1));
+	allObjects.push_back(dynamic_cast<Object*>(&plane2));
+	allObjects.push_back(dynamic_cast<Object*>(&plane3));
+	allObjects.push_back(dynamic_cast<Object*>(&plane4));
 	allObjects.push_back(dynamic_cast<Object*>(&plane5));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
+	allObjects.push_back(dynamic_cast<Object*>(&plane6));
 
 	//*/
 	Ray myray(Pe,npe);
@@ -210,10 +210,12 @@ int main (int argc, char const* argv[])
 			PeLens=P00Lens+(xLens*lx)*n0+(yLens*ly)*n1;	//Direction to shoot the ray from lens sample point
 			Pe = PeLens;
 			Point3f dirToShoot= Pp - PeLens;
+                        //dirToShoot = -1*dirToShoot;
 			dirToShoot.Normalize();
 			myray=Ray(PeLens, dirToShoot );	// This is the ray that we will shoot from camera to find out the color at pixel x,y
 			//cout<<"Plens: ";print(PeLens);cout<<endl;
 			//cout<<"Pp: ";print(Pp);cout<<endl;
+			//cout<<"Dir: ";print(dirToShoot);cout<<endl;
 
 			//myrar = Ray( samplepoint from lens, P [intersection point with focal plane] )
 			

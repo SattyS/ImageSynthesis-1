@@ -46,7 +46,7 @@ Point3f Pe(0,0,0);      //camera or eye position
 SpotLight spotLight(Point3f(0,10,5),Point3f(0,0,1),60.0/180.0);
 //Enable each variable to enable textures on them
 bool sphereTextureEnabled=false, genericTextureEnabled=false,planeTextureEnabled=true, textureRefractionMapEnabled=false;
-bool glossyEnabled=1;
+bool glossyEnabled=0,translucencyEnabled=1;
 //Point3f PL = spotLight.source;
 Point3f DirectionLight(0,-1,0);
 
@@ -78,7 +78,7 @@ int main (int argc, char const* argv[])
 	readPPMBumpMap();
 	
 	RGBType *pixels= new RGBType[n];
-	int index=0,M=8,N=M; 
+	int index=0,M=2,N=M; 
 	int Sx=10,winIndex=0;
 	int Sy=(Sx*Ymax)/Xmax;
 	float x,y;
@@ -106,9 +106,9 @@ int main (int argc, char const* argv[])
 	genericObjFileName = "cube_oriented.obj";
 	 //char *objfilename = "tetrahedron.obj";
 
-	Sphere sphere1(Point3f(-15,-20,65),15, Color(0,1,1),1,0.9 , 0);
-	Sphere sphere2(Point3f(0,-20,150),5, Color(1,0.2,0.3),2,0.9, 0);
-	Sphere sphere3(Point3f(15,-20,65),15, Color(0.1,0.5,1),3,0.9, 0);
+	Sphere sphere1(Point3f(-15,-20,65),15, Color(0,1,1),1,0 , 1.5);
+	Sphere sphere2(Point3f(0,-20,150),5, Color(1,0.2,0.3),2,0, 2);
+	Sphere sphere3(Point3f(15,-20,65),15, Color(0.1,0.5,1),3,0, 1.5);
 	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
 	
 	Plane plane1(Point3f(0,-1,0), Point3f(0,40,0), Color(1,1,1), "roof", 0,0);
@@ -174,7 +174,7 @@ int main (int argc, char const* argv[])
 	bool isOnePicture =true;
         for (float ior = 0; ior<=0;)
         {
-          allObjects[0]->eta = ior;
+          //allObjects[0]->eta = ior;
             for (int I = 0; I < Xmax; I++)
 	{
 		for (int J = 0; J < Ymax; J++)
@@ -328,10 +328,10 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
     Color colorFromReflectedObject(0,0,0);
     Color colorFromRefractedObject(0,0,0);
     double ks=allObjects[winIndex]->KS;
-    float rnd1 =-3 + 6*(rand()/float(RAND_MAX)),rnd2 = -1 + 2*(rand()/float(RAND_MAX)),rnd3 = -1 + 2*(rand()/float(RAND_MAX)) ;
+    float rnd1 =-1 + 2*(rand()/float(RAND_MAX)),rnd2 = -1 + 2*(rand()/float(RAND_MAX)),rnd3 = -1 + 2*(rand()/float(RAND_MAX)) ;
     //rnd1 = pow(rnd1,4);
-    rnd2 = pow(rnd2,4);
-    rnd3 = pow(rnd3,4);
+    //rnd2 = pow(rnd2,4);
+    //rnd3 = pow(rnd3,4);
     //printf(" rnd1,2,3: %f, %f, %f\n ",rnd1,rnd2,rnd3);
 
     
@@ -348,7 +348,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 		    if(((Sphere*)allObjects[winIndex])->id==2)
 			    glossyS=0.5;
 		    if(((Sphere*)allObjects[winIndex])->id==3)
-			    glossyS=0.08;
+			    glossyS=0.02;
 	    }
 	    Point3f Vrand(rnd1,0,0);
             //if(rnd1 >1.0 || rnd1 <-1.0) cout<<"wrond rnd1!!!!!!! "<<rnd1<<endl;
@@ -362,8 +362,8 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
               float NN=2;
               for(int i=1;i<NN;i++)
               {
-                rnd1 =-3 + 6*(rand()/float(RAND_MAX));
-                Vrand = Point3f(rnd1,rnd2,rnd3);
+                rnd1 =-1 + 2*(rand()/float(RAND_MAX));
+                Vrand = Point3f(rnd1,0,0);
 
                 Vrand = glossyS*Vrand;
 		    refLectedRayDirection = refLectedRayDirection + Vrand;
@@ -393,8 +393,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 			    }
 			    else if(( Y/( sqrt((1-(Z*Z)) ))<-1.0 )){
 				    theta = acos(-1.0);
-			    }
-			    //theta = asin(X/( sqrt((1-(Z*Z))) )  );
+			    } 			    //theta = asin(X/( sqrt((1-(Z*Z))) )  );
 		    }
 		    else
 			    theta = acos((double)( Y/(double)(sqrt((1.0-(Z*Z))) )  ) );
@@ -464,7 +463,37 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
             //cout<<"nextIntersection:";print(nextIntersection);
             //cout<<"refractedRaynew : "; print(refractedRaynew.direction);
             // */
-	    colorFromRefractedObject = rayTracer(refractedRaynew, PL,  allObjects , depth+1, spotlightEnabled ,softShadowFlag);
+            // for translucency 
+            float transS = 0;
+	    if(allObjects[winIndex]->objectName=="Sphere" )	
+	    {
+		    if(((Sphere*)allObjects[winIndex])->id==2)
+			    transS=0.5;
+		    if(((Sphere*)allObjects[winIndex])->id==3)
+			    transS=0.03;
+	    }
+	    Point3f Vrand(rnd1,0,0);
+            //if(rnd1 >1.0 || rnd1 <-1.0) cout<<"wrond rnd1!!!!!!! "<<rnd1<<endl;
+	    Vrand = transS*Vrand;
+            //colorFromReflectedObject = rayTracer(refLectedRay, PL,  allObjects , depth+1, spotlightEnabled ,softShadowFlag); 
+	    if(translucencyEnabled)
+	    {
+              float NN=2;
+              for(int i=1;i<NN;i++)
+              {
+                rnd1 =-3 + 6*(rand()/float(RAND_MAX));
+                Vrand = Point3f(rnd1,rnd2,rnd3);
+
+                Vrand = transS*Vrand;
+                refractedRayDirectionnew = refractedRayDirectionnew + Vrand;
+                refractedRayDirectionnew.Normalize();
+                refractedRaynew = Ray(nextIntersection, refractedRayDirectionnew);
+                colorFromRefractedObject= (colorFromRefractedObject + rayTracer(refractedRaynew, PL,  allObjects , depth+1, spotlightEnabled ,softShadowFlag))/NN; 
+              }
+	    }
+	    else
+              colorFromRefractedObject = rayTracer(refractedRaynew, PL,  allObjects , depth+1, spotlightEnabled ,softShadowFlag);
+	
             //cout<<"colorFromRefractedObject: ";
             //colorFromRefractedObject.printColor();
             //cout<<endl; 
@@ -477,17 +506,18 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 
                     double psi = acos(Z);
                     double theta = acos((double)( Y/(double)(sqrt((1.0-(Z*Z))) )  ) );
-
-                    if(abs( Y/( sqrt((1-(Z*Z)) ))>1.0 )) 
+                    if(( Y/( sqrt((1-(Z*Z)) ))>1.0 ) ||  (Y/( sqrt((1-(Z*Z)) ))<-1.0 )) 
                     {
-                      //cout<<"something is happenning============================================================================ \n";
-                      theta = asin(X/( sqrt((1-(Z*Z))) )  );
-                    }
-                    else if( abs(X/( sqrt((1-(Z*Z))) )) > 1 )
-                    {
-                      theta =0;
-                      cout<<"we are doomed!\n";
-                    }
+			    //cout<<"something is happenning============================================================================ \n";
+			    if(( Y/( sqrt((1-(Z*Z)) ))>1.0 )){
+				    theta = acos(1.0);
+			    }
+			    else if(( Y/( sqrt((1-(Z*Z)) ))<-1.0 )){
+				    theta = acos(-1.0);
+			    } 			    //theta = asin(X/( sqrt((1-(Z*Z))) )  );
+		    }
+		    else
+			    theta = acos((double)( Y/(double)(sqrt((1.0-(Z*Z))) )  ) );
 
 
 

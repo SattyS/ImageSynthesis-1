@@ -42,11 +42,11 @@ class SpotLight
 
 };
 
-Point3f Pe(0,0,0);      //camera or eye position
-SpotLight spotLight(Point3f(0,10,5),Point3f(0,0,1),60.0/180.0);
+Point3f Pe(1,0,0);      //camera or eye position
+SpotLight spotLight(Point3f(0,20,15),Point3f(0,0,1),60.0/180.0);
 //Enable each variable to enable textures on them
-bool sphereTextureEnabled=false, genericTextureEnabled=false,planeTextureEnabled=true, textureRefractionMapEnabled=false;
-bool glossyEnabled=1;
+bool sphereTextureEnabled=false, genericTextureEnabled=false,planeTextureEnabled=false, textureRefractionMapEnabled=false;
+bool glossyEnabled=0;
 //Point3f PL = spotLight.source;
 Point3f DirectionLight(0,-1,0);
 
@@ -78,14 +78,14 @@ int main (int argc, char const* argv[])
 	readPPMBumpMap();
 	
 	RGBType *pixels= new RGBType[n];
-	int index=0,M=8,N=M; 
+	int index=0,M=2,N=M; 
 	int Sx=10,winIndex=0;
 	int Sy=(Sx*Ymax)/Xmax;
 	float x,y;
 	
-	Point3f Vview(0,-20,65),Vup(0,1,0);	// point the view vector to focus on a particular point from Pe
+	Point3f Vview(0,0,10),Vup(0,1,0);	// point the view vector to focus on a particular point from Pe
 	//Vview = Point3f(0,0,1);
-	//Vview = Vview - Pe;
+	Vview = Vview - Pe;
 	Vview.Normalize();
 	//Vup.Normalize();
 	Point3f n2=Vview,n0=n2^Vup;
@@ -106,17 +106,17 @@ int main (int argc, char const* argv[])
 	genericObjFileName = "cube_oriented.obj";
 	 //char *objfilename = "tetrahedron.obj";
 
-	Sphere sphere1(Point3f(-15,-20,65),15, Color(0,1,1),1,0.9 , 0);
-	Sphere sphere2(Point3f(0,-20,150),5, Color(1,0.2,0.3),2,0.9, 0);
-	Sphere sphere3(Point3f(15,-20,65),15, Color(0.1,0.5,1),3,0.9, 0);
+	Sphere sphere1(Point3f(-15,0,70),15, Color(0,1,1),1, 1 , 0);
+	Sphere sphere2(Point3f(0,-10,40),5, Color(1,0.2,0.3),2, 1 , 0);
+	Sphere sphere3(Point3f(15,0,70),15, Color(0.1,0.5,1),3, 1 , 0);
 	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
 	
 	Plane plane1(Point3f(0,-1,0), Point3f(0,40,0), Color(1,1,1), "roof", 0,0);
-	Plane plane2(Point3f(-1,0,0), Point3f(60,0,0), Color(1,0,0), "left", 0,0);
-	Plane plane3(Point3f(0,0,-1), Point3f(0,0,60), Color(1,1,1), "front",0,0);
-	Plane plane4(Point3f(0,0,1), Point3f(0,0,-80), Color(0,0,0), "back", 0,0);
-	Plane plane5(Point3f(0,1,0), Point3f(0,-50,0), Color(1,1,1), "floor",0,0);
-	Plane plane6(Point3f(1,0,0), Point3f(-60,0,0), Color(0,1,0), "right",0,0);
+	Plane plane2(Point3f(-1,0,0), Point3f(40,0,0), Color(1,0,0), "left", 0,0);
+	Plane plane3(Point3f(0,0,-1), Point3f(0,0,150), Color(1,1,1), "front",0,0);
+	Plane plane4(Point3f(0,0,1), Point3f(0,0,-10), Color(0,0,0), "back", 0,0);
+	Plane plane5(Point3f(0,1,0), Point3f(0,-15,0), Color(1,1,1), "floor",0,0);
+	Plane plane6(Point3f(1,0,0), Point3f(-40,0,0), Color(0,1,0), "right",0,0);
 
 	//cout<<"debug/////";
 	GenericObject cube(genericObjFileName,0.2,1.33);
@@ -135,12 +135,12 @@ int main (int argc, char const* argv[])
 	allObjects.push_back(dynamic_cast<Object*>(&sphere3));
 	//allObjects.push_back(dynamic_cast<Object*>(&sphere4));
 	
-	//allObjects.push_back(dynamic_cast<Object*>(&plane1));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane3));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane5));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
+	allObjects.push_back(dynamic_cast<Object*>(&plane1));
+	allObjects.push_back(dynamic_cast<Object*>(&plane2));
+	allObjects.push_back(dynamic_cast<Object*>(&plane3));
+	allObjects.push_back(dynamic_cast<Object*>(&plane4));
+	allObjects.push_back(dynamic_cast<Object*>(&plane5));
+	allObjects.push_back(dynamic_cast<Object*>(&plane6));
 
 	//*/
 	Ray myray(Pe,npe);
@@ -174,7 +174,7 @@ int main (int argc, char const* argv[])
 	bool isOnePicture =true;
         for (float ior = 0; ior<=0;)
         {
-          allObjects[0]->eta = ior;
+          //allObjects[0]->eta = ior;
             for (int I = 0; I < Xmax; I++)
 	{
 		for (int J = 0; J < Ymax; J++)
@@ -207,7 +207,7 @@ int main (int argc, char const* argv[])
                         Color colorFromReflectedObject = finalColor;
 			// comment the following line for ENVIRONMENT MAP:
 
-                        //*                         
+                        /*                         
                         if(colorFromReflectedObject.red ==0 && colorFromReflectedObject.green ==0 && colorFromReflectedObject.blue==0)
                         {
                           double s0=1;
@@ -376,7 +376,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 		    colorFromReflectedObject = (colorFromReflectedObject + rayTracer(refLectedRay, PL,  allObjects , depth+1, spotlightEnabled ,softShadowFlag))/1.0; 
 
 	    // comment the following line for ENVIRONMENT MAP:
-	    //*
+	    /*
               if(colorFromReflectedObject.red ==0 && colorFromReflectedObject.green ==0 && colorFromReflectedObject.blue==0)
 	    {
 		    double s0=1;
@@ -469,7 +469,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
             //colorFromRefractedObject.printColor();
             //cout<<endl; 
 	    // comment the following line for ENVIRONMENT MAP:
-	    //*
+	    /*
             if(colorFromRefractedObject.red ==0 && colorFromRefractedObject.green ==0 && colorFromRefractedObject.blue==0)
 	    {
 		    double s0=1;

@@ -78,7 +78,7 @@ int main (int argc, char const* argv[])
 	readPPMBumpMap();
 	
 	RGBType *pixels= new RGBType[n];
-	int index=0,M=8,N=M; 
+	int index=0,M=2,N=2; 
 	int Sx=10,winIndex=0;
 	int Sy=(Sx*Ymax)/Xmax;
 	float x,y;
@@ -139,7 +139,7 @@ int main (int argc, char const* argv[])
 	//allObjects.push_back(dynamic_cast<Object*>(&plane2));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane3));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane4));
-	//allObjects.push_back(dynamic_cast<Object*>(&plane5));
+	allObjects.push_back(dynamic_cast<Object*>(&plane5));
 	//allObjects.push_back(dynamic_cast<Object*>(&plane6));
 
 	//*/
@@ -348,7 +348,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
 		    if(((Sphere*)allObjects[winIndex])->id==2)
 			    glossyS=0.5;
 		    if(((Sphere*)allObjects[winIndex])->id==3)
-			    glossyS=0.08;
+			    glossyS=0.02;
 	    }
 	    Point3f Vrand(rnd1,0,0);
             //if(rnd1 >1.0 || rnd1 <-1.0) cout<<"wrond rnd1!!!!!!! "<<rnd1<<endl;
@@ -363,7 +363,7 @@ Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  
               for(int i=1;i<NN;i++)
               {
                 rnd1 =-3 + 6*(rand()/float(RAND_MAX));
-                Vrand = Point3f(rnd1,rnd2,rnd3);
+                Vrand = Point3f(rnd1,0,0);
 
                 Vrand = glossyS*Vrand;
 		    refLectedRayDirection = refLectedRayDirection + Vrand;

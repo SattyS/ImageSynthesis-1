@@ -1008,11 +1008,12 @@ int findWinningPointIndex(vector<Point3f > myinter ,Point3f Pe)
 	
 	return index;
 }
+// environment map,
 void readPPM()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("water11.ppm","r");					//open PPM file for reading
+	    fp=fopen("env6.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
@@ -1113,11 +1114,13 @@ void readPPM1()
 	    //  }  								// Close if
 
 }									// End of the function
+
+// floor
 void readPPM2()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("tex1.ppm","r");					//open PPM file for reading
+	    fp=fopen("metal.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
