@@ -28,6 +28,7 @@
 #include<limits.h>
 #include "ObjectsDefine.h"
 #define print(p) printf("(%f,%f,%f) \n",p.x,p.y,p.z);
+#define printPixel(p) printf("(%f,%f,%f) \n",p.r,p.g,p.b);
 #define pb(a) push_back(a)
 class SpotLight
 {
@@ -65,7 +66,7 @@ int numRecursion = 4;
 Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth, bool spotlightEnabled ,int softShadowFlag);
 int main (int argc, char const* argv[])
 {
-  int antiAliasing=1;
+  int antiAliasing=0;
   bool spotlightEnabled=false;
 
   int Xmax = 500;
@@ -190,7 +191,12 @@ int main (int argc, char const* argv[])
     {
       for (int J = 0; J < Ymax; J++)
       {
-        // shooting rays from center of the pizel
+       index=J*Xmax + I;
+
+       pixels[index].r=0;
+              pixels[index].g=0;
+              pixels[index].b=0;
+ // shooting rays from center of the pizel
         for (int p = 0; p < M; p++)
         {
           for (int q = 0; q < N; q++)
@@ -208,7 +214,7 @@ int main (int argc, char const* argv[])
               x=(I+(p/M)+((rnd)/M))/Xmax;
               y=(J+(q/N)+((rnd)/N))/Ymax;
             }
-            index=J*Xmax + I;
+            
             Pp=P00+(x*Sx)*n0+(y*Sy)*n1;	//Direction to shoot the ray
             myray=Ray(Pe, Pp);	// This is the ray that we will shoot from camera to find out the color at pixel x,y
 
@@ -287,31 +293,58 @@ int main (int argc, char const* argv[])
             pixelsPrev[index].r = pixels[index].r;
             pixelsPrev[index].g = pixels[index].g;
             pixelsPrev[index].b = pixels[index].b;
+            
+            pixelsFinal[index].r = pixels[index].r;
+            pixelsFinal[index].g = pixels[index].g;
+            pixelsFinal[index].b = pixels[index].b;
+
+          }
+          else if (T==numFrames)
+          {
+
+            RGBType *diff= new RGBType[n];
+            diff[index].r = pixels[index].r;
+            diff[index].g = pixels[index].g;
+            diff[index].b = pixels[index].b;
+
           }
           else{
             for(float t=0;t<1.0;)
             {
-              pixelsPrev[index].r+= (pixels[index].r*(1-t) + (t)*pixelsPrev[index].r)/(2.0*motionSamples);
-              pixelsPrev[index].g+= (pixels[index].g*(1-t) + (t)*pixelsPrev[index].g)/(2.0*motionSamples);
-              pixelsPrev[index].b+= (pixels[index].b*(1-t) + (t)*pixelsPrev[index].b)/(2.0*motionSamples);
+              /*
+              if( (pixels[index].r >= 0.98*pixelsPrev[index].r && pixels[index].r >= 1.02*pixelsPrev[index].r)   &&  (pixels[index].g >= 0.98*pixelsPrev[index].g && pixels[index].g >= 1.02*pixelsPrev[index].g)   &&  (pixels[index].b >= 0.98*pixelsPrev[index].b && pixels[index].b >= 1.02*pixelsPrev[index].b) )
+              {
+                t+=0.05; 
+                pixelsPrev[index].r = pixelsPrev[index].r; 
+                pixelsPrev[index].g = pixelsPrev[index].g; 
+                pixelsPrev[index].b = pixelsPrev[index].b; 
+                //continue;
+                break;
+                }
+                // */
+                //cout<<"pixelsPrev: ";printPixel(pixelsPrev[index]); 
+              pixelsFinal[index].r+= (pixels[index].r*(t) + (1-t)*pixelsPrev[index].r);
+              pixelsFinal[index].g+= (pixels[index].g*(t) + (1-t)*pixelsPrev[index].g);
+              pixelsFinal[index].b+= (pixels[index].b*(t) + (1-t)*pixelsPrev[index].b);
               t+=0.05;
             }
-            //pixelsPrev[index].r = pixels[index].r;
-            //pixelsPrev[index].g = pixels[index].g;
-            //pixelsPrev[index].b = pixels[index].b;
+                pixelsFinal[index].r = pixelsFinal[index].r/(2.0*motionSamples); 
+                pixelsFinal[index].g = pixelsFinal[index].g/(2.0*motionSamples); 
+                pixelsFinal[index].b = pixelsFinal[index].b/(2.0*motionSamples); 
           }
 
-          //pixels[index].r=finalColor.red;
-          //pixels[index].g=finalColor.green;
-          //pixels[index].b=finalColor.blue;
         }
       }
+      pixelsPrev[index].r = pixelsFinal[index].r;
+            pixelsPrev[index].g = pixelsFinal[index].g;
+            pixelsPrev[index].b = pixelsFinal[index].b;
+
       time_t newTime;
     time(&newTime);
 
     std::string number;std::stringstream strstream;strstream <<(newTime);strstream >> number;
     string fileName = "scene_" + number + ".bmp";cout<<fileName<<endl;
-    savebmp(fileName.c_str(),Xmax,Ymax,dpi,pixelsPrev);
+    savebmp(fileName.c_str(),Xmax,Ymax,dpi,pixelsFinal);
 
     }
 
@@ -320,7 +353,7 @@ int main (int argc, char const* argv[])
 
     std::string number;std::stringstream strstream;strstream <<(newTime+1);strstream >> number;
     string fileName = "scene_" + number + ".bmp";cout<<fileName<<endl;
-    savebmp(fileName.c_str(),Xmax,Ymax,dpi,pixelsPrev);
+    savebmp(fileName.c_str(),Xmax,Ymax,dpi,pixelsFinal);
     ////////////////////////////////////////////////////////////////////////
     //ior+=0.05;
     //}
