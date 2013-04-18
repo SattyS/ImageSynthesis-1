@@ -42,7 +42,7 @@ class SpotLight
 
 };
 
-Point3f Pe(0,0,0);      //camera or eye position
+Point3f Pe(1,0,0);      //camera or eye position
 SpotLight spotLight(Point3f(0,10,5),Point3f(0,0,1),60.0/180.0);
 //Enable each variable to enable textures on them
 bool sphereTextureEnabled=false, genericTextureEnabled=false,planeTextureEnabled=false, textureRefractionMapEnabled=false;
@@ -82,229 +82,246 @@ int main (int argc, char const* argv[])
 	int Sx=10,winIndex=0;
 	int Sy=(Sx*Ymax)/Xmax;
 	float x,y;
-	
-	Point3f Vview(0,0,65),Vup(0,1,0);	// point the view vector to focus on a particular point from Pe
-	//Vview = Point3f(0,0,1);
-	//Vview = Vview - Pe;
-	Vview.Normalize();
-	//Vup.Normalize();
-	Point3f n2=Vview,n0=n2^Vup;
-	n0.Normalize();
-	Point3f n1=n0^n2;
-	n1.Normalize();
-	int d=10,f=20;
-	int lx=20,ly=(lx*Ymax)/Xmax;
-	Point3f npe=Pe,Pcenter=Pe+d*n2 , PcenterLens = Pe;
-	npe.Normalize();//print(npe);
-	Point3f P00=Pcenter-(Sx/2)*n0-(Sy/2)*n1,Pp;
-	Point3f P00Lens=PcenterLens-(lx/2)*n0-(ly/2)*n1, PeLens;
 
-	//vector<Sphere> allSpheres;
-	//allSpheres.pb(sphere1);
-	//string genericObjFileName="cube1.obj";
-	//printf("%s", genericObjFileName.c_str());
-	
-	string genericObjFileName="cube_00.obj";
-	genericObjFileName = "cube_oriented.obj";
-	 //char *objfilename = "tetrahedron.obj";
+        Point3f Vview(0,0,65),Vup(0,1,0);	// point the view vector to focus on a particular point from Pe
+        //Vview = Point3f(0,0,1);
+        Vview = Vview - Pe;
+        Vview.Normalize();
+        //Vup.Normalize();
+        Point3f n2=Vview,n0=n2^Vup;
+        n0.Normalize();
+        Point3f n1=n0^n2;
+        n1.Normalize();
+        int d=10,f=20;
+        int lx=533,ly=(lx*Ymax)/Xmax;
+        Point3f npe=Pe,Pcenter=Pe+d*n2 , PcenterLens = Pe;
+        npe.Normalize();//print(npe);
+        Point3f P00=Pcenter-(Sx/2)*n0-(Sy/2)*n1,Pp;
+        Point3f P00Lens=PcenterLens-(lx/2)*n0-(ly/2)*n1, PeLens;
 
-	Sphere sphere1(Point3f(-10,0,85),10, Color(0,1,1),1,0.9 , 0);
-	Sphere sphere2(Point3f(0,0,150),5, Color(1,0.2,0.3),2,0.9, 0);
-	Sphere sphere3(Point3f(10,0,65),10, Color(0.1,0.5,1),3,0.9, 0);
-	//Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
-	
-	Plane plane1(Point3f(0,-1,0), Point3f(0,40,0), Color(1,1,1), "roof", 0,0);
-	Plane plane2(Point3f(-1,0,0), Point3f(60,0,0), Color(1,0,0), "left", 0,0);
-	Plane plane3(Point3f(0,0,-1), Point3f(0,0,100), Color(1,0.5,0.5), "front",0,0);
-	Plane plane4(Point3f(0,0,1), Point3f(0,0,-80), Color(0,0,0), "back", 0,0);
-	Plane plane5(Point3f(0,1,0), Point3f(0,-50,0), Color(1,0,1), "floor",0,0);
-	Plane plane6(Point3f(1,0,0), Point3f(-60,0,0), Color(0,1,0), "right",0,0);
+        //vector<Sphere> allSpheres;
+        //allSpheres.pb(sphere1);
+        //string genericObjFileName="cube1.obj";
+        //printf("%s", genericObjFileName.c_str());
 
-	//cout<<"debug/////";
-	GenericObject cube(genericObjFileName,0.2,1.33);
+        string genericObjFileName="cube_00.obj";
+        genericObjFileName = "cube_oriented.obj";
+        //char *objfilename = "tetrahedron.obj";
 
-	//ObjMesh triMesh= LoadObjMesh(genericObjFileName);
+        Sphere sphere1(Point3f(-10,0,85),10, Color(0,1,1),1,0.9 , 0);
+        Sphere sphere2(Point3f(0,0,150),5, Color(1,0.2,0.3),2,0.9, 0);
+        Sphere sphere3(Point3f(10,0,65),10, Color(0.1,0.5,1),3,0.9, 0);
+        //Sphere sphere4(Point3f(1,1,6),3, Color(0,0.5,1),4);
 
-	//GenericObject cube1(triMesh);
-	//GenericObject cube1(genericObjFileName);
-	//cout<<"debug/////";
+        Plane plane1(Point3f(0,-1,0), Point3f(0,40,0), Color(1,1,1), "roof", 0,0);
+        Plane plane2(Point3f(-1,0,0), Point3f(60,0,0), Color(1,0,0), "left", 0,0);
+        Plane plane3(Point3f(0,0,-1), Point3f(0,0,100), Color(1,0.5,0.5), "front",0,0);
+        Plane plane4(Point3f(0,0,1), Point3f(0,0,-80), Color(0,0,0), "back", 0,0);
+        Plane plane5(Point3f(0,1,0), Point3f(0,-50,0), Color(1,0,1), "floor",0,0);
+        Plane plane6(Point3f(1,0,0), Point3f(-60,0,0), Color(0,1,0), "right",0,0);
 
-	vector<Object*> allObjects;
-	//allObjects.push_back(dynamic_cast<Object*>(&cube));
-	
-	allObjects.push_back(dynamic_cast<Object*>(&sphere1));
-	allObjects.push_back(dynamic_cast<Object*>(&sphere2));
-	allObjects.push_back(dynamic_cast<Object*>(&sphere3));
-	//allObjects.push_back(dynamic_cast<Object*>(&sphere4));
-	
-	allObjects.push_back(dynamic_cast<Object*>(&plane1));
-	allObjects.push_back(dynamic_cast<Object*>(&plane2));
-	allObjects.push_back(dynamic_cast<Object*>(&plane3));
-	allObjects.push_back(dynamic_cast<Object*>(&plane4));
-	allObjects.push_back(dynamic_cast<Object*>(&plane5));
-	allObjects.push_back(dynamic_cast<Object*>(&plane6));
+        //cout<<"debug/////";
+        GenericObject cube(genericObjFileName,0.2,1.33);
 
-	//*/
-	Ray myray(Pe,npe);
-	int No=allObjects.size();	
-	vector<Point3f > myinter;
-	float rnd;
+        //ObjMesh triMesh= LoadObjMesh(genericObjFileName);
 
-			//printf("psi: %f 
-    Point3f PL;
-	PL = spotLight.source;
+        //GenericObject cube1(triMesh);
+        //GenericObject cube1(genericObjFileName);
+        //cout<<"debug/////";
 
-	// CHECK IF YOU'RE INSIDE ANY OF THE SPHERES ///////////////////////////
-	for (int i = 0; i < allObjects.size(); i++)
-	{	
+        vector<Object*> allObjects;
+        //allObjects.push_back(dynamic_cast<Object*>(&cube));
+
+        allObjects.push_back(dynamic_cast<Object*>(&sphere1));
+        allObjects.push_back(dynamic_cast<Object*>(&sphere2));
+        allObjects.push_back(dynamic_cast<Object*>(&sphere3));
+        //allObjects.push_back(dynamic_cast<Object*>(&sphere4));
+
+        allObjects.push_back(dynamic_cast<Object*>(&plane1));
+        allObjects.push_back(dynamic_cast<Object*>(&plane2));
+        allObjects.push_back(dynamic_cast<Object*>(&plane3));
+        allObjects.push_back(dynamic_cast<Object*>(&plane4));
+        allObjects.push_back(dynamic_cast<Object*>(&plane5));
+        allObjects.push_back(dynamic_cast<Object*>(&plane6));
+
+        //*/
+
+        
+        Plane focalPlane(Point3f(0,0,-1), Point3f(0,0,f), Color(0,1,0), "focalPlane",0,0);
+
+        Ray myray(Pe,npe);
+        int No=allObjects.size();	
+        vector<Point3f > myinter;
+        float rnd;
+
+        //printf("psi: %f 
+        Point3f PL;
+        PL = spotLight.source;
+
+        // CHECK IF YOU'RE INSIDE ANY OF THE SPHERES ///////////////////////////
+        for (int i = 0; i < allObjects.size(); i++)
+        {	
           if(!allObjects[i]->isEyeOutside(Pe) )
-		{	cout<<"Eye is inside the object \n";return 1;}
-	}
-	cout<<"EEye and light are outside all the object \n";
-	
-	
-	vector<Point3f> lights;
+          {	cout<<"Eye is inside the object \n";return 1;}
+        }
+        cout<<"EEye and light are outside all the object \n";
+
+
+        vector<Point3f> lights;
         lights.pb(Point3f(10,24,30));
         lights.pb(Point3f(-10,24,30));
         lights.pb(Point3f(0,24,0));
 
         double alpha0= cos(spotLight.angle);
         int softShadowFlag=0;
-	vector <Point3f> tmp;
-	//tmp.resize(2);
-	Color finalColor(0,0,0);
-	bool isOnePicture =true;
-	float xLens =0, yLens=0;
+        vector <Point3f> tmp;
+        //tmp.resize(2);
+        Color finalColor(0,0,0);
+        bool isOnePicture =true;
+        float xLens =0, yLens=0;
         for (float ior = 0; ior<=0;)
         {
           allObjects[0]->eta = ior;
-            for (int I = 0; I < Xmax; I++)
-	{
-		for (int J = 0; J < Ymax; J++)
-		{
-			int rndx1=rand()%M, rndy1=rand()%N;
-			int rndx2=rand()%M, rndy2=rand()%N;
-			// shooting rays from center of the pizel
-			for (int p = 0; p < M; p++)
-			{
-				for (int q = 0; q < N; q++)
-				{
-			x=(I+0.5)/Xmax;
-			y=(J+0.5)/Ymax;
-			if(antiAliasing!=1)
-			{
-				x=(I+0.5)/Xmax;
-				y=(J+0.5)/Ymax;
+          for (int I = 0; I < Xmax; I++)
+          {
+            for (int J = 0; J < Ymax; J++)
+            {
+              int rndx1=rand()%M, rndy1=rand()%N;
+              int rndx2=rand()%M, rndy2=rand()%N;
+              // shooting rays from center of the pizel
+              for (int p = 0; p < M; p++)
+              {
+                for (int q = 0; q < N; q++)
+                {
+                  x=(I+0.5)/Xmax;
+                  y=(J+0.5)/Ymax;
+                  if(antiAliasing!=1)
+                  {
+                    x=(I+0.5)/Xmax;
+                    y=(J+0.5)/Ymax;
 
-			}
-			else
-			{
-				rnd=(float)((float)(rand()%100)/(100.0));
-				x=(I+( ((p+rndx1)%M)/M) +((rnd)/M))/Xmax;
-				y=(J+( ((q+rndy1)%N)/N) +((rnd)/N))/Ymax;
-				xLens=(I+( ((p+rndx2)%M)/M) +((rnd)/M))/Xmax;
-				yLens=(J+( ((q+rndy2)%N)/N) +((rnd)/N))/Ymax;
-			}
-			index=J*Xmax + I;
-			Pp=P00+(x*Sx)*n0+(y*Sy)*n1;	//Direction to shoot the ray
-			PeLens=P00Lens+(xLens*lx)*n0+(yLens*ly)*n1;	//Direction to shoot the ray from lens sample point
-			Pe = PeLens;
-			Point3f dirToShoot= Pp - PeLens;
-                        //dirToShoot = -1*dirToShoot;
-			dirToShoot.Normalize();
-			myray=Ray(PeLens, dirToShoot );	// This is the ray that we will shoot from camera to find out the color at pixel x,y
-			//cout<<"Plens: ";print(PeLens);cout<<endl;
-			//cout<<"Pp: ";print(Pp);cout<<endl;
-			//cout<<"Dir: ";print(dirToShoot);cout<<endl;
+                  }
+                  else
+                  {
+                    rnd=(float)((float)(rand()%100)/(100.0));
+                    x=(I+( ((p+rndx1)%M)/M) +((rnd)/M))/Xmax;
+                    y=(J+( ((q+rndy1)%N)/N) +((rnd)/N))/Ymax;
+                    xLens=(I+( ((p+rndx2)%M)/M) +((rnd)/M))/Xmax;
+                    yLens=(J+( ((q+rndy2)%N)/N) +((rnd)/N))/Ymax;
+                  }
+                  index=J*Xmax + I;
+                  PeLens=P00Lens+(xLens*lx)*n0+(yLens*ly)*n1;	//Direction to shoot the ray from lens sample point
+                  Pe = PeLens;
 
-			//myrar = Ray( samplepoint from lens, P [intersection point with focal plane] )
-			
-			finalColor = rayTracer(myray, PL,  allObjects , 0,spotlightEnabled ,softShadowFlag);
-                        
-                        Point3f refLectedRayDirection =myray.direction ;refLectedRayDirection.Normalize();
-                        Color colorFromReflectedObject = finalColor;
-			// comment the following line for ENVIRONMENT MAP:
-
-                        /*                         
-                        if(colorFromReflectedObject.red ==0 && colorFromReflectedObject.green ==0 && colorFromReflectedObject.blue==0)
-                        {
-                          double s0=1;
-                          double X = refLectedRayDirection.x/s0 , Y = refLectedRayDirection.y/s0, Z = refLectedRayDirection.z/s0;
-
-                          double psi = acos(Z);
-                          //double theta = acos( Y/(float)(sqrt((1-(Z*Z))) )  );
-			  double theta;// = acos((double)( Y/(double)(sqrt((1.0-(Z*Z))) )  ) );
-
-			  if(( Y/( sqrt((1-(Z*Z)) ))>1.0 ) ||  (Y/( sqrt((1-(Z*Z)) ))<-1.0 )) 
-			  {
-				  //cout<<"something is happenning============================================================================ \n";
-				  if(( Y/( sqrt((1-(Z*Z)) ))>1.0 )){
-					  theta = acos(1.0);
-				  }
-				  else if(( Y/( sqrt((1-(Z*Z)) ))<-1.0 )){
-					  theta = acos(-1.0);
-				  }
-				  //theta = asin(X/( sqrt((1-(Z*Z))) )  );
-			  }
-			  else
-				  theta = acos((double)( Y/(double)(sqrt((1.0-(Z*Z))) )  ) );
-
-			  double PI = 3.14;
-			  double v = psi/PI, u = theta/(2*PI);
-
-                          if(X<0)	{u = 1-u;//v=1-v;//cout<<"adfioubnwirgnw";
-                          }
-                          //if(v<0)	v = v+1;
-
-                          //if(( (X>0 && X<1) && (Y>0 && Y<1) ) )   {                                  u = X; v = Y;
-                          u = u*projectionImageWidth,v=v*projectionImageHeight;
-                          int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
-
-                          // printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
-                          //cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
-                          //cout<< (float)pixmap[pixmapIndex]<<endl;
-                          colorFromReflectedObject.red = (float)(pixmap[pixmapIndex])/maxcolor;
-                          colorFromReflectedObject.green =(float)(pixmap[pixmapIndex+1])/maxcolor;
-                          colorFromReflectedObject.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
-
-                          finalColor = colorFromReflectedObject;
+                  // BEGIN Pe calculations
+                  //Pcenter=Pe+d*n2;
+                  //P00=Pcenter-(Sx/2)*n0-(Sy/2)*n1,Pp;
+                  Pp=P00+(x*Sx)*n0+(y*Sy)*n1;	//Direction to shoot the ray
+                  // END Pe calculations
+                  
+                  // begin focal plane method
+                   
+                  // focal point  = center of camera + focal distance * direction of ray at centre
+                  
 
 
-                        }	
-                        // */
-			if(antiAliasing==1)
-			{
-				pixels[index].r=finalColor.red;  
-				pixels[index].g=finalColor.green;
-				pixels[index].b=finalColor.blue; 
+                  // end focal plane method
+                  Point3f dirToShoot= Pp - PeLens;
+                  //dirToShoot = -1*dirToShoot;
+                  dirToShoot.Normalize();
+                  myray=Ray(PeLens, dirToShoot );	// This is the ray that we will shoot from camera to find out the color at pixel x,y
+                  //cout<<"Plens: ";print(PeLens);cout<<endl;
+                  //cout<<"Pp: ";print(Pp);cout<<endl;
+                  //cout<<"Dir: ";print(dirToShoot);cout<<endl;
 
-			}
-			else
-			{
-				pixels[index].r+=finalColor.red/(M*N);
-				pixels[index].g+=finalColor.green/(M*N);
-				pixels[index].b+=finalColor.blue/(M*N);
-			}
-			}
-			}
-			//pixels[index].r=finalColor.red;
-			//pixels[index].g=finalColor.green;
-			//pixels[index].b=finalColor.blue;
-		}
-	}
-        
-	time_t newTime;
-	time(&newTime);
+                  //myrar = Ray( samplepoint from lens, P [intersection point with focal plane] )
 
-	std::string number;std::stringstream strstream;strstream <<newTime;strstream >> number;
-	string fileName = "scene_" + number + ".bmp";cout<<fileName<<endl;
-	savebmp(fileName.c_str(),Xmax,Ymax,dpi,pixels);
-	////////////////////////////////////////////////////////////////////////
-        ior+=0.05;
+                  finalColor = rayTracer(myray, PL,  allObjects , 0,spotlightEnabled ,softShadowFlag);
+
+                  Point3f refLectedRayDirection =myray.direction ;refLectedRayDirection.Normalize();
+                  Color colorFromReflectedObject = finalColor;
+                  // comment the following line for ENVIRONMENT MAP:
+
+                  /*                         
+                                             if(colorFromReflectedObject.red ==0 && colorFromReflectedObject.green ==0 && colorFromReflectedObject.blue==0)
+                                             {
+                                             double s0=1;
+                                             double X = refLectedRayDirection.x/s0 , Y = refLectedRayDirection.y/s0, Z = refLectedRayDirection.z/s0;
+
+                                             double psi = acos(Z);
+                  //double theta = acos( Y/(float)(sqrt((1-(Z*Z))) )  );
+                  double theta;// = acos((double)( Y/(double)(sqrt((1.0-(Z*Z))) )  ) );
+
+                  if(( Y/( sqrt((1-(Z*Z)) ))>1.0 ) ||  (Y/( sqrt((1-(Z*Z)) ))<-1.0 )) 
+                  {
+                  //cout<<"something is happenning============================================================================ \n";
+                  if(( Y/( sqrt((1-(Z*Z)) ))>1.0 )){
+                  theta = acos(1.0);
+                  }
+                  else if(( Y/( sqrt((1-(Z*Z)) ))<-1.0 )){
+                  theta = acos(-1.0);
+                  }
+                  //theta = asin(X/( sqrt((1-(Z*Z))) )  );
+                  }
+                  else
+                  theta = acos((double)( Y/(double)(sqrt((1.0-(Z*Z))) )  ) );
+
+                  double PI = 3.14;
+                  double v = psi/PI, u = theta/(2*PI);
+
+                  if(X<0)	{u = 1-u;//v=1-v;//cout<<"adfioubnwirgnw";
+                  }
+                  //if(v<0)	v = v+1;
+
+                  //if(( (X>0 && X<1) && (Y>0 && Y<1) ) )   {                                  u = X; v = Y;
+                  u = u*projectionImageWidth,v=v*projectionImageHeight;
+                  int pixmapIndex = abs((int)v * projectionImageWidth + (int)u) * 3;
+
+                  // printf("psi: %f , theta: %f , u: %f , v: %f \n",psi, theta, u , v);
+                  //cout<<(int)( (Y * projectionImageWidth + X) * 3 )<<endl; 
+                  //cout<< (float)pixmap[pixmapIndex]<<endl;
+                  colorFromReflectedObject.red = (float)(pixmap[pixmapIndex])/maxcolor;
+                  colorFromReflectedObject.green =(float)(pixmap[pixmapIndex+1])/maxcolor;
+                  colorFromReflectedObject.blue = (float)(pixmap[pixmapIndex + 2])/maxcolor;
+
+                  finalColor = colorFromReflectedObject;
+
+
+                  }	
+                  // */
+                  if(antiAliasing==0)
+                  {
+                    pixels[index].r=finalColor.red;  
+                    pixels[index].g=finalColor.green;
+                    pixels[index].b=finalColor.blue; 
+
+                  }
+                  else
+                  {
+                    pixels[index].r+=finalColor.red/(M*N);
+                    pixels[index].g+=finalColor.green/(M*N);
+                    pixels[index].b+=finalColor.blue/(M*N);
+                  }
+                }
+                }
+                //pixels[index].r=finalColor.red;
+                //pixels[index].g=finalColor.green;
+                //pixels[index].b=finalColor.blue;
+              }
+            }
+
+            time_t newTime;
+            time(&newTime);
+
+            std::string number;std::stringstream strstream;strstream <<newTime;strstream >> number;
+            string fileName = "scene_" + number + ".bmp";cout<<fileName<<endl;
+            savebmp(fileName.c_str(),Xmax,Ymax,dpi,pixels);
+            ////////////////////////////////////////////////////////////////////////
+            ior+=0.05;
+          }
+          return 0;
+
         }
-	return 0;
-	
-}
 
 Color rayTracer(Ray myray, Point3f PL, vector<Object*> allObjects , int depth,  bool spotlightEnabled=false ,int softShadowFlag=0)
 {

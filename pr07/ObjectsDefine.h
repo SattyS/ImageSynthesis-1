@@ -1013,7 +1013,7 @@ void readPPM()
 { 
 	  int ch, bit, comment;
 	    FILE *fp;
-	    fp=fopen("env6.ppm","r");					//open PPM file for reading
+	    fp=fopen("env9.ppm","r");					//open PPM file for reading
 	    //fp=fopen("red.ppm","r");					//open PPM file for reading
 	    if(fp == NULL)
 	    {
